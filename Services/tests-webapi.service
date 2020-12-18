@@ -1,5 +1,5 @@
 [Unit]
-Description=Tests.Authorization app
+Description=Tests.WebApi app
 
 [Service]
 WorkingDirectory=/root/Tests.WebApi.Builded/Tests.WebApi/bin/Release/netcoreapp3.1

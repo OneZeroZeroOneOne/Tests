@@ -182,6 +182,7 @@ namespace Tests.WebApi
             {
                 app.UseSwagger();
             }
+
             else
             {
                 var basePath = "/api/management";
