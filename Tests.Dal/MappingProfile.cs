@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
 using Tests.Dal.In;
 using Tests.Dal.Models;
 using Tests.Dal.Out;
@@ -22,6 +24,11 @@ namespace Tests.WebApi.Dal
 
             CreateMap<Employee, Employee>()
                 .ForMember(x => x.Id, x => x.MapFrom((y, yy) => yy.Id));
+
+
+            CreateMap<LongevityType, OutLongevityTypeViewModel>();
+            CreateMap<SubscriptionType, OutSubscriptionTypeViewModel>().ForMember(x => x.Longevity, x => x.MapFrom(y => y.LongevityType));
+            CreateMap<Subscription, OutSubscriptionViewModel>().ForMember(x => x.Type, x => x.MapFrom(y => y.Type));
         }
     }
 }

@@ -1,0 +1,62 @@
+name: Deploy Tests.WebApi
+
+on:
+  push:
+    branches: [main]
+    
+    paths:
+      - 'Tests.Payment.WebApi/**'
+      - 'Tests.Security/**'
+      - 'Tests.Utilities/**'
+      - 'Tests.Bll/**'
+      - 'Tests.Dal/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2.0.0
+
+      - name: setup .net core
+        uses: actions/setup-dotnet@v1.7.2
+        with:
+          dotnet-version: 3.1.100
+      - name: Build with dotnet
+        id: building
+        run: dotnet build Tests.Payment.WebApi/Tests.Payment.WebApi.csproj --configuration Release
+      - name: List builded files
+        run: ls
+      - name: Copy file via ssh password
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "Tests.Payment.WebApi/bin/Release/netcoreapp3.1/*"
+          target: "Tests.Payment.WebApi.Builded"
+      - name: Downloading service-check script
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: wget "https://raw.githubusercontent.com/OneZeroZeroOneOne/Tests/main/service-check" -O "/root/service-check"
+      - name: Giving rights for service check
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: chmod +rx "/root/service-check"
+      - name: Starting service-check
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: /root/service-check tests-payment-webapi.service

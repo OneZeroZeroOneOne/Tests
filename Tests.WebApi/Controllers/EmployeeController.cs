@@ -15,7 +15,7 @@ namespace Tests.WebApi.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        EmployeeService _employeeService;
+        private readonly EmployeeService _employeeService;
         private readonly IMapper _mapperProfile;
         public EmployeeController(EmployeeService employeeService, IMapper mapperProfile)
         {

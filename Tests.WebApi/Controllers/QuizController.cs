@@ -15,8 +15,8 @@ namespace Tests.WebApi.Controllers
     [ApiController]
     public class QuizController : ControllerBase
     {
-        public QuizService _quizService;
-        private IMapper _mapperProfile;
+        private readonly QuizService _quizService;
+        private readonly IMapper _mapperProfile;
         public QuizController(QuizService quizService, IMapper mapperProfile)
         {
             _quizService = quizService;

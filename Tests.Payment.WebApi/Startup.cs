@@ -1,18 +1,19 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Tests.Bll.Services;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
@@ -21,7 +22,7 @@ using Tests.Security.Options;
 using Tests.Utilities.Middlewares;
 using Tests.WebApi.Dal;
 
-namespace Tests.WebApi
+namespace Tests.Payment.WebApi
 {
     public class Startup
     {
@@ -32,6 +33,7 @@ namespace Tests.WebApi
 
         public IConfiguration Configuration { get; }
 
+        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -63,22 +65,11 @@ namespace Tests.WebApi
                         policy.Requirements.Add(new RoleEntryRequirement(t.Id)));
                 });
             }
+
             services.AddSingleton<IAuthorizationHandler, RoleEntryHandler>();
 
-            services.AddTransient<EmployeeService>();
+            services.AddTransient<SubscriptionService>();
 
-            services.AddTransient<ResumeService>();
-
-            services.AddTransient<AvatarService>();
-
-            services.AddScoped(x =>
-            {
-                var a = new AttachmentPathProvider();
-                a.ConfigurePath();
-                return a;
-            });
-
-            services.AddTransient<QuizService>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -137,7 +128,8 @@ namespace Tests.WebApi
                     });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AttachmentPathProvider attachmentPathProvider)
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -145,31 +137,16 @@ namespace Tests.WebApi
             }
 
             app.ConfigureCustomExceptionMiddleware();
-            if (env.IsDevelopment())
-            {
-                
-            }
-            else
-            {
-                app.UseStaticFiles(new StaticFileOptions()
-                {
-                    FileProvider = new PhysicalFileProvider(Path.Combine(attachmentPathProvider.GetPath(), "Files")),
-                    RequestPath = new PathString("/Files")
-                });
-            }
-            
 
             app.UseCors(x => x.AllowAnyOrigin());
 
             app.UseCors(x => x.AllowAnyHeader());
 
-            app.UseStaticFiles();
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 
             app.UseMiddleware<JwtMiddleware>();
-
-            app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
@@ -184,7 +161,7 @@ namespace Tests.WebApi
             }
             else
             {
-                var basePath = "/api/management";
+                var basePath = "/api/payments";
                 app.UseSwagger(c => c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
                 {
                     swaggerDoc.Servers = new List<OpenApiServer>
