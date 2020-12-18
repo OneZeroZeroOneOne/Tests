@@ -15,6 +15,7 @@ namespace Tests.Bll.Services
 
         public async Task<User> GetUser(int id)
         {
+            
             return await _context.User.Include(x => x.Role).Include(x => x.UserSecurity).FirstOrDefaultAsync(x => x.Id == id);
         }
     }
