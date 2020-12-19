@@ -12,28 +12,30 @@ namespace Tests.Dal.Contexts
             _connectionString = connectionString;
         }
 
-        public virtual DbSet<Avatar> Avatar { get; set; }
-        public virtual DbSet<Resume> Resume { get; set; }
         public virtual DbSet<Answer> Answer { get; set; }
         public virtual DbSet<AnswerTamplate> AnswerTamplate { get; set; }
+        public virtual DbSet<Avatar> Avatar { get; set; }
+        public virtual DbSet<DiscountType> DiscountType { get; set; }
         public virtual DbSet<Employee> Employee { get; set; }
         public virtual DbSet<JwtOptions> JwtOptions { get; set; }
-        public virtual DbSet<Position> Positions { get; set; }
         public virtual DbSet<LongevityType> LongevityType { get; set; }
+        public virtual DbSet<Position> Position { get; set; }
         public virtual DbSet<Question> Question { get; set; }
         public virtual DbSet<QuestionTemplate> QuestionTemplate { get; set; }
-        public virtual DbSet<Position> Position { get; set; }
         public virtual DbSet<QuestionType> QuestionType { get; set; }
         public virtual DbSet<Quiz> Quiz { get; set; }
+        public virtual DbSet<Resume> Resume { get; set; }
         public virtual DbSet<Role> Role { get; set; }
         public virtual DbSet<Status> Status { get; set; }
         public virtual DbSet<Subscription> Subscription { get; set; }
+        public virtual DbSet<SubscriptionDiscount> SubscriptionDiscount { get; set; }
         public virtual DbSet<SubscriptionType> SubscriptionType { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserAnswer> UserAnswer { get; set; }
         public virtual DbSet<UserEmployee> UserEmployee { get; set; }
         public virtual DbSet<UserQuiz> UserQuiz { get; set; }
         public virtual DbSet<UserSecurity> UserSecurity { get; set; }
+        public virtual DbSet<Vacancy> Vacancy { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -46,16 +48,6 @@ namespace Tests.Dal.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "C.UTF-8");
-
-            modelBuilder.Entity<Avatar>(en =>
-            {
-                en.HasKey(x => x.Id);
-            });
-
-            modelBuilder.Entity<Resume>(en =>
-            {
-                en.HasKey(x => x.Id);
-            });
 
             modelBuilder.Entity<Answer>(entity =>
             {
@@ -79,6 +71,36 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("AnswerTamplate_QuestionTamplateId_fkey");
             });
 
+            modelBuilder.Entity<Avatar>(entity =>
+            {
+                entity.ToTable("Avatar");
+
+                entity.Property(e => e.Id).HasDefaultValueSql("nextval('\"Avatar_id_seq\"'::regclass)");
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.Path).IsRequired();
+            });
+
+            modelBuilder.Entity<DiscountType>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.BreakpointSubscriptionTypeId })
+                    .HasName("DiscountType_pkey");
+
+                entity.ToTable("DiscountType");
+
+                entity.HasIndex(e => e.Id, "DiscountType_Id_BreakpointSubscriptionTypeId_key")
+                    .IsUnique();
+
+                entity.Property(e => e.DiscountValue).HasPrecision(255);
+
+                entity.HasOne(d => d.BreakpointSubscriptionType)
+                    .WithMany(p => p.DiscountTypes)
+                    .HasForeignKey(d => d.BreakpointSubscriptionTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("DiscountType_BreakpointSubscriptionTypeId_fkey");
+            });
+
             modelBuilder.Entity<Employee>(entity =>
             {
                 entity.ToTable("Employee");
@@ -87,11 +109,29 @@ namespace Tests.Dal.Contexts
 
                 entity.Property(e => e.MiddleName).IsRequired();
 
-                entity.Property(e => e.Position).IsRequired();
-
                 entity.Property(e => e.SurName)
                     .IsRequired()
                     .HasMaxLength(255);
+
+                entity.HasOne(d => d.Avatar)
+                    .WithMany(p => p.Employees)
+                    .HasForeignKey(d => d.AvatarId)
+                    .HasConstraintName("Employee_AvatarId_fkey");
+
+                entity.HasOne(d => d.Position)
+                    .WithMany(p => p.Employees)
+                    .HasForeignKey(d => d.PositionId)
+                    .HasConstraintName("Employee_PositionId_fkey");
+
+                entity.HasOne(d => d.Resume)
+                    .WithMany(p => p.Employees)
+                    .HasForeignKey(d => d.ResumeId)
+                    .HasConstraintName("Employee_ResumeId_fkey");
+
+                entity.HasOne(d => d.Vacancy)
+                    .WithMany(p => p.Employees)
+                    .HasForeignKey(d => d.VacancyId)
+                    .HasConstraintName("Employee_VacancyId_fkey");
             });
 
             modelBuilder.Entity<JwtOptions>(entity =>
@@ -112,7 +152,15 @@ namespace Tests.Dal.Contexts
 
                 entity.Property(e => e.Id).HasDefaultValueSql("nextval('positionid_seq'::regclass)");
 
+                entity.Property(e => e.Description).IsRequired();
+
                 entity.Property(e => e.Title).IsRequired();
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Positions)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Position_UserId_fkey");
             });
 
             modelBuilder.Entity<Question>(entity =>
@@ -158,6 +206,17 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("Quiz_StatusId_fkey");
             });
 
+            modelBuilder.Entity<Resume>(entity =>
+            {
+                entity.ToTable("Resume");
+
+                entity.Property(e => e.Id).HasDefaultValueSql("nextval('\"Resume_id_seq\"'::regclass)");
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.Path).IsRequired();
+            });
+
             modelBuilder.Entity<Role>(entity =>
             {
                 entity.ToTable("Role");
@@ -170,10 +229,13 @@ namespace Tests.Dal.Contexts
 
             modelBuilder.Entity<Subscription>(entity =>
             {
-                entity.HasKey(e => new { e.Id, e.UserId })
+                entity.HasKey(e => new { e.UserId, e.Id })
                     .HasName("Subscription_pkey");
 
                 entity.ToTable("Subscription");
+
+                entity.HasIndex(e => e.Id, "Subscription_Id_key")
+                    .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
@@ -190,6 +252,32 @@ namespace Tests.Dal.Contexts
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Subscription_UserId_fkey");
+            });
+
+            modelBuilder.Entity<SubscriptionDiscount>(entity =>
+            {
+                entity.HasKey(e => new { e.SubscriptionId, e.DiscountTypeId })
+                    .HasName("SubscriptionDiscount_pkey");
+
+                entity.ToTable("SubscriptionDiscount");
+
+                entity.Property(e => e.CreatedDateTime).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.TotalDiscount).HasPrecision(255);
+
+                entity.HasOne(d => d.DiscountType)
+                    .WithMany(p => p.SubscriptionDiscounts)
+                    .HasPrincipalKey(p => p.Id)
+                    .HasForeignKey(d => d.DiscountTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("SubscriptionDiscount_DiscountTypeId_fkey");
+
+                entity.HasOne(d => d.Subscription)
+                    .WithMany(p => p.SubscriptionDiscounts)
+                    .HasPrincipalKey(p => p.Id)
+                    .HasForeignKey(d => d.SubscriptionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("SubscriptionDiscount_SubscriptionId_fkey");
             });
 
             modelBuilder.Entity<SubscriptionType>(entity =>
@@ -311,6 +399,21 @@ namespace Tests.Dal.Contexts
                     .HasForeignKey<UserSecurity>(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("UserSecurity_UserId_fkey");
+            });
+
+            modelBuilder.Entity<Vacancy>(entity =>
+            {
+                entity.ToTable("Vacancy");
+
+                entity.Property(e => e.Description).IsRequired();
+
+                entity.Property(e => e.Title).IsRequired();
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Vacancies)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Vacancy_UserId_fkey");
             });
 
             modelBuilder.HasSequence("positionid_seq");

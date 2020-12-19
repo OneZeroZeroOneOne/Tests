@@ -19,6 +19,7 @@ using Tests.Dal.Models;
 using Tests.Security.Authorization;
 using Tests.Security.Options;
 using Tests.Utilities.Middlewares;
+using Tests.WebApi.Controllers;
 using Tests.WebApi.Dal;
 
 namespace Tests.WebApi
@@ -70,6 +71,10 @@ namespace Tests.WebApi
             services.AddTransient<ResumeService>();
 
             services.AddTransient<AvatarService>();
+
+            services.AddTransient<VacancyService>();
+
+            services.AddTransient<PositionService>();
 
             services.AddScoped(x =>
             {

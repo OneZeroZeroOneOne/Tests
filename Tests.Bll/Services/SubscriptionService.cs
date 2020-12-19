@@ -35,6 +35,11 @@ namespace Tests.Bll.Services
         {
             return await _context.SubscriptionType.Include(x => x.LongevityType).ToListAsync();
         }
+
+        /*public async Task<List<SubscriptionType>> GetSubscriptionTypes()
+        {
+            return await _context.SubscriptionType.Include(x => x.LongevityType).ToListAsync();
+        }*/
     }
     
 }

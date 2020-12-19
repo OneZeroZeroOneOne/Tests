@@ -9,18 +9,17 @@ namespace Tests.Dal.Out
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        public string? Position { get; set; }
-        public string? Email { get; set; }
+        public string Email { get; set; }
         public string SurName { get; set; }
         public string Phone { get; set; }
-        public int Salary { get; set; }
+        public int? Salary { get; set; }
         public string SotialNetworks { get; set; }
-        public int? AvatarId { get; set; }
-        public string? AvatarPath { get; set; }
-        public string? Address { get; set; }
-        public int? ResumeId { get; set; }
-        public string? ResumePath { get; set; }
-        public string? ResumeName { get; set; }
+        public string Adress { get; set; }
+        public bool? IsCandidate { get; set; }
         public List<OutQuizViewModel> Quizzes {get; set;}
+        public virtual OutAvatarViewModel Avatar { get; set; }
+        public virtual OutPositionViewModel Position { get; set; }
+        public virtual OutResumeViewModel Resume { get; set; }
+        public virtual OutVacancyViewModel Vacancy { get; set; }
     }
 }

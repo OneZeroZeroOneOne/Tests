@@ -9,6 +9,7 @@ namespace Tests.Dal.Models
     {
         public SubscriptionType()
         {
+            DiscountTypes = new HashSet<DiscountType>();
             Subscriptions = new HashSet<Subscription>();
         }
 
@@ -18,8 +19,10 @@ namespace Tests.Dal.Models
         public int LongevityTypeId { get; set; }
         public string Name { get; set; }
         public int AvailableTestAmount { get; set; }
+        public bool NeedToShow { get; set; }
 
         public virtual LongevityType LongevityType { get; set; }
+        public virtual ICollection<DiscountType> DiscountTypes { get; set; }
         public virtual ICollection<Subscription> Subscriptions { get; set; }
     }
 }

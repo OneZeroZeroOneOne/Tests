@@ -12,5 +12,6 @@ namespace Tests.Dal.Out
         public OutLongevityTypeViewModel Longevity { get; set; }
         public string Name { get; set; }
         public int AvailableTestAmount { get; set; }
+        public bool NeedToShow { get; set; }
     }
 }

@@ -5,17 +5,19 @@ using System.Collections.Generic;
 
 namespace Tests.Dal.Models
 {
-    public partial class Avatar
+    public partial class Vacancy
     {
-        public Avatar()
+        public Vacancy()
         {
             Employees = new HashSet<Employee>();
         }
 
         public int Id { get; set; }
-        public string Path { get; set; }
-        public string Name { get; set; }
+        public string Title { get; set; }
+        public int UserId { get; set; }
+        public string Description { get; set; }
 
+        public virtual User User { get; set; }
         public virtual ICollection<Employee> Employees { get; set; }
     }
 }

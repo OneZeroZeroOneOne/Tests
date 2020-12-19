@@ -30,6 +30,7 @@ namespace Tests.Bll.Services
                     .ThenInclude(x => x.Questions).ThenInclude(x => x.UserAnswers)
                     .Include(x => x.Avatar)
                     .Include(x => x.Resume)
+                    .Include(x => x.Vacancy)
                     .FirstOrDefaultAsync(x => x.Id == empId);
             }
             return null;
@@ -43,6 +44,7 @@ namespace Tests.Bll.Services
                 .ThenInclude(x => x.UserQuizzes).ThenInclude(x => x.Quiz).ThenInclude(x => x.Status)
                 .Include(x => x.Employee.Avatar)
                 .Include(x => x.Employee.Resume)
+                .Include(x => x.Employee.Vacancy)
                 .Select(x => x.Employee);
 
             if (quizStatusId != null)
@@ -128,6 +130,7 @@ namespace Tests.Bll.Services
             return await _context.Employee
                 .Include(x => x.Avatar)
                 .Include(x => x.Resume)
+                .Include(x => x.Vacancy)
                 .FirstOrDefaultAsync(x => x.Id == empId); 
         }
     }
