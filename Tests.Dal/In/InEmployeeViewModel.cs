@@ -16,5 +16,6 @@ namespace Tests.Dal.In
         public int? AvatarId { get; set; }
         public string? Adress { get; set; }
         public int? ResumeId { get; set; }
+        public bool IsCandidate { get; set; }
     }
 }
