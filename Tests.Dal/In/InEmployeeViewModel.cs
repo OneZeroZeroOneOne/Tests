@@ -7,7 +7,7 @@ namespace Tests.Dal.In
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        public string Position { get; set; }
+        public int PositionId { get; set; }
         public string? Email { get; set; }
         public string SurName { get; set; }
         public string? Phone { get; set; }

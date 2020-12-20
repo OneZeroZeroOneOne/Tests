@@ -45,6 +45,7 @@ namespace Tests.Bll.Services
                 .Include(x => x.Employee.Avatar)
                 .Include(x => x.Employee.Resume)
                 .Include(x => x.Employee.Vacancy)
+                .Include(x => x.Employee.Position)
                 .Select(x => x.Employee);
 
             if (quizStatusId != null)
@@ -78,10 +79,13 @@ namespace Tests.Bll.Services
                 newEmp.Resume = resume;
             }
 
+            var position = await _context.Position.FirstOrDefaultAsync(x => x.Id == newEmp.PositionId);
+            newEmp.Position = position ?? throw ExceptionFactory.FriendlyException(ExceptionEnum.PositionDoesNotExist, "");
+
             await _context.Employee.AddAsync(newEmp);
             await _context.SaveChangesAsync();
 
-            UserEmployee ue = new UserEmployee()
+            var ue = new UserEmployee
             {
                 UserId = userId,
                 EmployeeId = newEmp.Id,
@@ -89,7 +93,6 @@ namespace Tests.Bll.Services
 
             await _context.UserEmployee.AddAsync(ue);
             await _context.SaveChangesAsync();
-
 
             return newEmp;
         }
@@ -116,6 +119,12 @@ namespace Tests.Bll.Services
                     throw ExceptionFactory.SoftException(ExceptionEnum.ResumeRecordDoesntExist, "");
             }
 
+            var position = await _context.Position.FirstOrDefaultAsync(x => x.Id == editEmp.PositionId);
+
+            if (position == null)
+                throw ExceptionFactory.FriendlyException(ExceptionEnum.PositionDoesNotExist, "");
+
+
             Employee emp = await _context.Employee
                 .FirstOrDefaultAsync(x => x.Id == empId);
 
@@ -124,6 +133,7 @@ namespace Tests.Bll.Services
             emp.UserEmployees = new List<UserEmployee> { userEmployee };
             emp.Avatar = await _context.Avatar.FirstOrDefaultAsync(x => x.Id == editEmp.AvatarId);
             emp.Resume = await _context.Resume.FirstOrDefaultAsync(x => x.Id == editEmp.ResumeId);
+            emp.Position = position;
 
             await _context.SaveChangesAsync();
 
@@ -131,6 +141,7 @@ namespace Tests.Bll.Services
                 .Include(x => x.Avatar)
                 .Include(x => x.Resume)
                 .Include(x => x.Vacancy)
+                .Include(x => x.Position)
                 .FirstOrDefaultAsync(x => x.Id == empId); 
         }
     }

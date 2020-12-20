@@ -15,5 +15,6 @@
         ExceededMaximumTests = 11,
         AvatarRecordDoesntExist = 12,
         ResumeRecordDoesntExist = 13,
+        PositionDoesNotExist = 14,
     }
 }
