@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tests.Dal.Models;
+using Tests.Dal.Models.Views;
+
 #nullable disable
 
 namespace Tests.Dal.Contexts
@@ -36,6 +38,7 @@ namespace Tests.Dal.Contexts
         public virtual DbSet<UserQuiz> UserQuiz { get; set; }
         public virtual DbSet<UserSecurity> UserSecurity { get; set; }
         public virtual DbSet<Vacancy> Vacancy { get; set; }
+        public virtual DbSet<PositionsWithCount> PositionsWithCounts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -48,6 +51,8 @@ namespace Tests.Dal.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "C.UTF-8");
+
+            modelBuilder.AddPositionWithCountView();
 
             modelBuilder.Entity<Answer>(entity =>
             {
@@ -112,6 +117,8 @@ namespace Tests.Dal.Contexts
                 entity.Property(e => e.SurName)
                     .IsRequired()
                     .HasMaxLength(255);
+
+                entity.Property(x => x.DateOfBirth);
 
                 entity.HasOne(d => d.Avatar)
                     .WithMany(p => p.Employees)

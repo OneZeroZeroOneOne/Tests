@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
+using Tests.Dal.Models.Views;
 
 namespace Tests.Bll.Services
 {
@@ -27,6 +28,11 @@ namespace Tests.Bll.Services
         public async Task<List<Position>> GetUserPositions(int userId)
         {
             return await _context.Position.Where(x => x.UserId == userId).ToListAsync();
+        }
+
+        public async Task<List<PositionsWithCount>> GetUserPositionsWithCount(int adminId)
+        {
+            return await _context.PositionsWithCounts.Where(x => x.UserId == adminId).ToListAsync();
         }
     }
 }

@@ -42,11 +42,19 @@ namespace Tests.WebApi.Controllers
 
         [HttpGet]
         [Authorize(Policy = "ClientAdmin")]
-        public async Task<List<OutPositionViewModel>> AddUserPosition()
+        public async Task<List<OutPositionViewModel>> GetUserPositions()
         {
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
             List<Position> userPositions = await _positionService.GetUserPositions(authorizedUserModel.Id);
             return _mapperProfile.Map<List<OutPositionViewModel>>(userPositions);
+        }
+
+        [HttpGet("Count")]
+        [Authorize(Policy = "ClientAdmin")]
+        public async Task<List<OutPositionsWithCount>> GetUserPositionsWithCount()
+        {
+            AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
+            return _mapperProfile.Map<List<OutPositionsWithCount>>(await _positionService.GetUserPositionsWithCount(authorizedUserModel.Id));
         }
     }
 }

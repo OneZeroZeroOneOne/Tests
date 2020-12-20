@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using Tests.Dal.In;
 using Tests.Dal.Models;
+using Tests.Dal.Models.Views;
 using Tests.Dal.Out;
 
 namespace Tests.WebApi.Dal
@@ -38,8 +39,8 @@ namespace Tests.WebApi.Dal
             CreateMap<LongevityType, OutLongevityTypeViewModel>();
             CreateMap<SubscriptionType, OutSubscriptionTypeViewModel>().ForMember(x => x.Longevity, x => x.MapFrom(y => y.LongevityType));
             CreateMap<Subscription, OutSubscriptionViewModel>().ForMember(x => x.Type, x => x.MapFrom(y => y.Type));
-            
-            
+
+            CreateMap<PositionsWithCount, OutPositionsWithCount>();
         }
     }
 }
