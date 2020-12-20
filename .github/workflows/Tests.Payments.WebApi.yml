@@ -1,4 +1,4 @@
-name: Deploy Tests.WebApi
+name: Deploy Tests.Payments.WebApi
 
 on:
   push:
