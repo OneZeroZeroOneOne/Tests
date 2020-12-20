@@ -35,10 +35,10 @@ namespace Tests.WebApi.Controllers
 
         [HttpGet]
         [Authorize(Policy = "ClientAdmin")]
-        public async Task<List<OutEmployeeViewModel>> GetEmployees([FromQuery]int? quizStatusId = null, [FromQuery]bool? isCandidate = null)
+        public async Task<List<OutEmployeeViewModel>> GetEmployees([FromQuery]int? quizStatusId = null, [FromQuery]bool? isCandidate = null, [FromQuery]int? positionId = null)
         {
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
-            return _mapperProfile.Map<List<OutEmployeeViewModel>>(await _employeeService.GetEmployees(authorizedUserModel.Id, quizStatusId, isCandidate));
+            return _mapperProfile.Map<List<OutEmployeeViewModel>>(await _employeeService.GetEmployees(authorizedUserModel.Id, quizStatusId, positionId, isCandidate));
         }
 
         [HttpPost]

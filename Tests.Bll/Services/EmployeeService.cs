@@ -36,7 +36,7 @@ namespace Tests.Bll.Services
             return null;
         }
 
-        public async Task<List<Employee>> GetEmployees(int userId, int? quizStatusId, bool? isCandidate)
+        public async Task<List<Employee>> GetEmployees(int userId, int? quizStatusId, int? positionId, bool? isCandidate)
         {
             var userEmployees = _context.UserEmployee
                 .Where(x => x.UserId == userId)
@@ -53,6 +53,9 @@ namespace Tests.Bll.Services
 
             if (isCandidate != null)
                 userEmployees = userEmployees.Where(x => x.IsCandidate == isCandidate);
+
+            if (positionId != null)
+                userEmployees = userEmployees.Where(x => x.PositionId == positionId);
 
             return await userEmployees.ToListAsync();
         }
@@ -80,7 +83,7 @@ namespace Tests.Bll.Services
             }
 
             var position = await _context.Position.FirstOrDefaultAsync(x => x.Id == newEmp.PositionId);
-            newEmp.Position = position ?? throw ExceptionFactory.FriendlyException(ExceptionEnum.PositionDoesNotExist, "");
+            newEmp.Position = position ?? throw ExceptionFactory.SoftException(ExceptionEnum.PositionDoesNotExist, "");
 
             await _context.Employee.AddAsync(newEmp);
             await _context.SaveChangesAsync();
