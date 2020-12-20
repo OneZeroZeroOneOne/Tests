@@ -19,7 +19,7 @@ namespace Tests.Dal.Models.Views
             model.Entity<PositionsWithCount>(x =>
             {
                 x.ToTable("View_GetPositionsWithCount");
-                x.HasKey(x => x.Id);
+                x.HasKey(x => new {x.Id, x.IsCandidate});
             });
 
             return model;
