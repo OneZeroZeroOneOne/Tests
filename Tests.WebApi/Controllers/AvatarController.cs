@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Tests.Bll.Services;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
+using Tests.Dal.Out;
 
 namespace Tests.WebApi.Controllers
 {
@@ -29,17 +30,22 @@ namespace Tests.WebApi.Controllers
             var ext = Path.GetExtension(uploadedFile.FileName);
             var fileName = DateTime.UtcNow.ToFileTimeUtc();
 
-            string path = Path.Combine(Path.Combine(_attachmentPathProvider.GetPath(), "Files"), fileName + ext);
+            var path = Path.Combine(Path.Combine(_attachmentPathProvider.GetPath(), "Files"), fileName + ext);
             await using (var fileStream = new FileStream(path, FileMode.Create))
             {
                 await uploadedFile.CopyToAsync(fileStream);
             }
 
-            Avatar file = new Avatar { Path = "Files/" + fileName + ext,  Name = uploadedFile.FileName };
+            var file = new Avatar { Path = "Files/" + fileName + ext,  Name = uploadedFile.FileName };
 
             await _avatarService.AddAvatar(file);
 
-            return Ok(file);
+            return Ok(new OutAvatarViewModel
+            {
+                Name = file.Name,
+                Id = file.Id,
+                Path = file.Path,
+            });
         }
     }
 }
