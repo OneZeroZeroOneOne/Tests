@@ -31,6 +31,7 @@ namespace Tests.Bll.Services
                     .Include(x => x.Avatar)
                     .Include(x => x.Resume)
                     .Include(x => x.Vacancy)
+                    .Include(x => x.Position)
                     .FirstOrDefaultAsync(x => x.Id == empId);
             }
             return null;
