@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-      - name: Checkout on host
+      - name: Docker compose restart
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
