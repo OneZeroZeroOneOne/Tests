@@ -2,7 +2,8 @@ name: Deploy API
 
 on:
   push:
-    branches: [docker-deploy]
+    branches: 
+      - 'development/**'
     
 
 jobs:
