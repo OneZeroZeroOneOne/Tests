@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: ./Dockerfile-authorization
     ports:
-      - "8000:9000"
+      - "9000:8000"
     expose:
       - "9000"
     env_file:
@@ -21,7 +21,7 @@ services:
     volumes:
       - /root/Files:/root/Files
     ports:
-      - "8001:9001"
+      - "9001:8001"
     expose:
       - "9001"
     env_file:
@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: ./Dockerfile-payments
     ports:
-      - "8002:9002"
+      - "9002:8002"
     expose:
       - "9002"
     env_file:
