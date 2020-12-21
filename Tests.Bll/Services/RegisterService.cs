@@ -17,7 +17,7 @@ namespace Tests.Bll.Services
         public async Task<User> RegisterClientAdmin(string login, string password, string email, string name)
         {
             Role role = await _context.Role.FirstOrDefaultAsync(x => x.Title == "ClientAdmin");
-            User newUser = new User() { RoleId = role.Id, Name = name, CreateDateTime = DateTime.Now};
+            User newUser = new User() { RoleId = role.Id, Name = name, CreateDateTime = DateTime.Now, AvatarId = 1};
             await _context.User.AddAsync(newUser);
             await _context.SaveChangesAsync();
             UserSecurity userSecurity = new UserSecurity()
@@ -25,7 +25,7 @@ namespace Tests.Bll.Services
                 Login = login,
                 Password = password,
                 UserId = newUser.Id,
-                Email = email
+                Email = email,
             };
             await _context.UserSecurity.AddAsync(userSecurity);
             await _context.SaveChangesAsync();
