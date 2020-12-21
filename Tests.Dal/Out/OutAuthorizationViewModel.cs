@@ -1,4 +1,4 @@
-﻿namespace Tests.Dal.Models.Out
+﻿namespace Tests.Dal.Out
 {
     public class OutAuthorizationViewModel
     {

@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Tests.Bll.Services;
 using Tests.Dal.Models;
-using Tests.Dal.Models.Out;
-using Tests.Security;
+using Tests.Dal.Out;
+using Tests.Security.Authorization;
 
-namespace Tests.Authorization.Controllers
+namespace Tests.Authorization.WebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]

@@ -15,12 +15,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Tests.Bll.Services;
+using Tests.Dal;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
 using Tests.Security.Authorization;
 using Tests.Security.Options;
 using Tests.Utilities.Middlewares;
-using Tests.WebApi.Dal;
 
 namespace Tests.Payment.WebApi
 {

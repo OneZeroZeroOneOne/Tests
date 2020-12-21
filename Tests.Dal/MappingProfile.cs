@@ -1,13 +1,11 @@
-﻿using AutoMapper;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
+﻿using System.Linq;
+using AutoMapper;
 using Tests.Dal.In;
 using Tests.Dal.Models;
 using Tests.Dal.Models.Views;
 using Tests.Dal.Out;
 
-namespace Tests.WebApi.Dal
+namespace Tests.Dal
 {
     public class MappingProfile : Profile
     {

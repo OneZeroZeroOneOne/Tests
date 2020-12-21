@@ -1,50 +1,57 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
-using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Tests.Bll.Services;
-using Tests.Dal.Models;
-using Tests.Dal.Models.Out;
-using Tests.Security;
+using Tests.Dal.Contexts;
+using Tests.Dal.Out;
+using Tests.Security.Authorization;
 using Tests.Security.Options;
 using Tests.Utilities.Exceptions;
 
-namespace Tests.Authorization.Controllers
+namespace Tests.Authorization.WebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        private UserService _userService;
+        private readonly UserService _userService;
+        private readonly MainContext _context;
 
-        public UserController(UserService userService)
+        public UserController(UserService userService, MainContext context)
         {
             _userService = userService;
+            _context = context;
         }
 
         [HttpGet]
         public async Task<OutUserViewModel> GetUserInfo()
         {
             var headers = this.Request.Headers;
-            if (headers.ContainsKey("authorization"))
+            if (!headers.ContainsKey("authorization"))
+                throw ExceptionFactory.FriendlyException(ExceptionEnum.AuthorizationHeaderNotExist,
+                    "Authorization header not exist");
+
+            headers.TryGetValue("authorization", out var token);
+            var jwtToken = JwtService.ParseToken(token.ToString().Split(" ").Last(), AuthOption.KEY);
+            var userId = int.Parse(jwtToken.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value);
+            var user = await _userService.GetUser(userId);
+
+            var avatar = await _context.Avatar.FirstOrDefaultAsync(x => x.Id == user.AvatarId);
+
+            return new OutUserViewModel
             {
-                headers.TryGetValue("authorization", out StringValues token);
-                JwtSecurityToken jwtToken = JwtService.ParseToken(token.ToString().Split(" ").Last(), AuthOption.KEY);
-                int userId = int.Parse(jwtToken.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value);
-                User user = await _userService.GetUser(userId);
-                return new OutUserViewModel()
+                Id = user.Id,
+                Name = user.Name,
+                RoleId = user.RoleId,
+                Avatar = avatar != null ? new OutAvatarViewModel
                 {
-                    Id = user.Id,
-                    Name = user.Name,
-                    RoleId = user.RoleId,
-                    AvatarUrl = user.AvatarUrl,
-                    Email = user.UserSecurity.Email,
-                    RoleName = user.Role.Title,
-                };
-            }
-            throw ExceptionFactory.FriendlyException(ExceptionEnum.AuthorizationHeaderNotExist, "Authorization header not exist");
+                    Id = avatar.Id,Name = avatar.Name, Path = avatar.Path
+                } : null,
+                Email = user.UserSecurity.Email,
+                RoleName = user.Role.Title,
+            };
         }
     }
 }

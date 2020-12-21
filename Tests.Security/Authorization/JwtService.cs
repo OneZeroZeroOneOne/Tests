@@ -1,15 +1,15 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Tests.Utilities.Exceptions;
-using System.Security.Cryptography;
 using System.IO;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 using Tests.Security.Options;
+using Tests.Utilities.Exceptions;
 
-namespace Tests.Security
+namespace Tests.Security.Authorization
 {
     public static class JwtService
     {

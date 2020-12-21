@@ -1,4 +1,4 @@
-﻿namespace Tests.Dal.Models.Out
+﻿namespace Tests.Dal.Out
 {
     public class OutUserViewModel
     {
@@ -7,6 +7,6 @@
         public int RoleId { get; set; }
         public string RoleName { get; set; }
         public string Email { get; set; }
-        public string AvatarUrl { get; set; }
+        public OutAvatarViewModel Avatar { get; set; }
     }
 }
