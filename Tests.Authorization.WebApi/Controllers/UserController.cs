@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Tests.Bll.Services;
 using Tests.Dal.Contexts;
+using Tests.Dal.Models;
 using Tests.Dal.Out;
 using Tests.Security.Authorization;
 using Tests.Security.Options;
@@ -38,7 +39,11 @@ namespace Tests.Authorization.WebApi.Controllers
             var userId = int.Parse(jwtToken.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value);
             var user = await _userService.GetUser(userId);
 
-            var avatar = await _context.Avatar.FirstOrDefaultAsync(x => x.Id == user.AvatarId);
+            Avatar avatar = null;
+            if (user.AvatarId != null)
+            {
+                avatar = await _context.Avatar.FirstOrDefaultAsync(x => x.Id == user.AvatarId);
+            }
 
             return new OutUserViewModel
             {
