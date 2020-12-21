@@ -24,6 +24,7 @@ jobs:
           script: rm -rf Tests_dev && git clone https://github.com/OneZeroZeroOneOne/Tests Tests_dev && cd Tests_dev && git fetch --all && git reset --hard origin/${{ steps.extract_branch.outputs.branch }} && git checkout ${{ steps.extract_branch.outputs.branch }}
   
   pass-envfile:
+    needs: update-source
     runs-on: ubuntu-18.04
 
     steps:
@@ -45,6 +46,7 @@ jobs:
           target: "Tests_dev/"
   
   deploy:
+    needs: pass-envfile
     runs-on: ubuntu-18.04
 
     steps:
