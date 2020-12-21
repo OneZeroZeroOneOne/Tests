@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+  authorization-web-api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-authorization
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"
+    env_file:
+     - ./api.env
+    environment: 
+      - ASPNETCORE_ENVIRONMENT=Production
+      
+  management-web-api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-management
+    volumes:
+      - /root/Files:/root/Files
+    ports:
+      - "8001:8001"
+    expose:
+      - "8001"
+    env_file:
+     - ./api.env
+    environment: 
+      - ASPNETCORE_ENVIRONMENT=Production
+  
+  payments-web-api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-payments
+    ports:
+      - "8002:8002"
+    expose:
+      - "8002"
+    env_file:
+     - ./api.env
+    environment: 
+      - ASPNETCORE_ENVIRONMENT=Production

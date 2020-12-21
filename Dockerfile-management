@@ -1,0 +1,26 @@
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+WORKDIR /source
+
+COPY Tests.WebApi/*.csproj Tests.WebApi/
+COPY Tests.Dal/*.csproj Tests.Dal/
+COPY Tests.Bll/*.csproj Tests.Bll/
+COPY Tests.Security/*.csproj Tests.Security/
+COPY Tests.Utilities/*.csproj Tests.Utilities/
+
+RUN dotnet restore Tests.WebApi/Tests.WebApi.csproj
+
+COPY Tests.WebApi/ Tests.WebApi/
+COPY Tests.Dal/ Tests.Dal/
+COPY Tests.Bll/ Tests.Bll/
+COPY Tests.Security/ Tests.Security/
+COPY Tests.Utilities/ Tests.Utilities/
+WORKDIR /source/Tests.WebApi
+RUN dotnet build -c release
+
+FROM build AS publish
+RUN dotnet publish -c release --no-build -o /app
+
+FROM mcr.microsoft.com/dotnet/aspnet:3.1
+WORKDIR /app
+COPY --from=publish /app .
+ENTRYPOINT ["dotnet", "Tests.WebApi.dll"]
