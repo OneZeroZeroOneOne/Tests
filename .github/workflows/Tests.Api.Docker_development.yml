@@ -1,5 +1,8 @@
 name: Deploy API
 
+env:
+  directoryName: 'Tests_dev'
+
 on:
   push:
     branches: 
@@ -22,7 +25,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: rm -rf Tests_dev && git clone https://github.com/OneZeroZeroOneOne/Tests Tests_dev && cd Tests_dev && git fetch --all && git reset --hard origin/${{ steps.extract_branch.outputs.branch }} && git checkout ${{ steps.extract_branch.outputs.branch }}
+          script: rm -rf ${{env.directoryName}} && git clone https://github.com/${{github.repository}} ${{env.directoryName}} && cd ${{env.directoryName}} && git fetch --all && git reset --hard origin/${{ steps.extract_branch.outputs.branch }} && git checkout ${{ steps.extract_branch.outputs.branch }}
   
   pass-envfile:
     needs: update-source
@@ -44,7 +47,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           source: "api.env"
-          target: "Tests_dev/"
+          target: "${{env.directoryName}}/"
   
   deploy:
     needs: pass-envfile
@@ -58,5 +61,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: cd Tests_dev && docker-compose down && docker-compose up --build --detach
+          script: cd ${{env.directoryName}} && docker-compose down && docker-compose up --build --detach
   
