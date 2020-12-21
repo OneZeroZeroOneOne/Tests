@@ -24,7 +24,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          source: "api.env"
+          source: "development_api.env"
           target: "/root/"
   deploy:
     runs-on: ubuntu-latest
