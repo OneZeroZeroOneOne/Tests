@@ -6,7 +6,7 @@ on:
     
 
 jobs:
-  deploy:
+  update-source:
     runs-on: ubuntu-latest
     steps:
       - name: Extract branch name
@@ -32,7 +32,7 @@ jobs:
         with:
           envkey_DEBUG: false
           envkey_DATABASECONNECTIONSTRING: ${{ secrets.DATABASECONNECTIONSTRING }}
-          file_name: development_api.env
+          file_name: api.env
 
       - name: Move envfile to host
         uses: appleboy/scp-action@master
@@ -41,5 +41,19 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          source: "development_api.env"
+          source: "api.env"
           target: "Tests_dev/"
+  
+  deploy:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout on host
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: cd Tests_dev && docker-compose down && docker-compose up --build --detach
+  
