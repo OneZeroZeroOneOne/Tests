@@ -23,7 +23,6 @@ namespace Tests.Dal
             CreateMap<Resume, OutResumeViewModel>();
             CreateMap<Vacancy, OutVacancyViewModel>();
 
-
             CreateMap<Employee, OutEmployeeViewModel>().ForMember(x => x.Quizzes,
                 x => x.MapFrom(y => y.UserQuizzes.ToList().Select(t => t.Quiz)))
                 .ForMember(x => x.Vacancy, x => x.MapFrom(y => y.Vacancy))

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Tests.Utilities.Exceptions
+﻿namespace Tests.Utilities.Exceptions
 {
     public class ExceptionFactory
     {

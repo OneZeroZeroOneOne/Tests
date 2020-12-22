@@ -16,5 +16,8 @@
         AvatarRecordDoesntExist = 12,
         ResumeRecordDoesntExist = 13,
         PositionDoesNotExist = 14,
+        CompanyNameCantBeEmpty = 15,
+        EmailCantBeEmpty = 16,
+        PasswordCantBeEmpty = 17,
     }
 }

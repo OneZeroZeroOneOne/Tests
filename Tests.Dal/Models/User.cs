@@ -24,6 +24,7 @@ namespace Tests.Dal.Models
 
         public virtual Role Role { get; set; }
         public virtual UserSecurity UserSecurity { get; set; }
+        public virtual Avatar Avatar { get; set; }
         public virtual ICollection<Position> Positions { get; set; }
         public virtual ICollection<Subscription> Subscriptions { get; set; }
         public virtual ICollection<UserEmployee> UserEmployees { get; set; }

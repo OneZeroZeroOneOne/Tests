@@ -317,6 +317,10 @@ namespace Tests.Dal.Contexts
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("User_RoleId_fkey");
+
+                entity.HasOne(x => x.Avatar)
+                    .WithOne(x => x.User)
+                    .HasForeignKey<User>(x => x.AvatarId);
             });
 
             modelBuilder.Entity<UserAnswer>(entity =>
