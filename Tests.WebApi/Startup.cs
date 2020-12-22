@@ -20,6 +20,7 @@ using Tests.Dal.Models;
 using Tests.Security.Authorization;
 using Tests.Security.Options;
 using Tests.Utilities.Middlewares;
+using Tests.WebApi.Controllers;
 
 namespace Tests.WebApi
 {
@@ -48,7 +49,7 @@ namespace Tests.WebApi
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
 
-            JwtOptions jwtOption = context.JwtOptions.FirstOrDefault();
+            var jwtOption = context.JwtOptions.FirstOrDefault();
 
             if (jwtOption == null) throw new ApplicationException("Can't configure authorize jwt options");
 
@@ -74,6 +75,7 @@ namespace Tests.WebApi
             services.AddTransient<VacancyService>();
 
             services.AddTransient<PositionService>();
+            services.AddTransient<NotificationService>();
 
             services.AddScoped(x =>
             {
