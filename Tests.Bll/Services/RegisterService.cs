@@ -8,11 +8,15 @@ namespace Tests.Bll.Services
 {
     public class RegisterService
     {
-        private MainContext _context;
-        public RegisterService(MainContext maincontext)
+        private readonly MainContext _context;
+        private readonly NotificationService _notificationService;
+
+        public RegisterService(MainContext mainContext, NotificationService notificationService)
         {
-            _context = maincontext;
+            _context = mainContext;
+            _notificationService = notificationService;
         }
+
 
         public async Task<User> RegisterClientAdmin(string login, string password, string email, string name)
         {
@@ -27,6 +31,9 @@ namespace Tests.Bll.Services
                 UserId = newUser.Id,
                 Email = email,
             };
+
+            await _notificationService.AddDefaultNotificationSetting(newUser.Id);
+
             await _context.UserSecurity.AddAsync(userSecurity);
             await _context.SaveChangesAsync();
             return newUser;

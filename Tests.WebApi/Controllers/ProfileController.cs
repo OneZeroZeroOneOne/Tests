@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tests.Bll.Services;
 using Tests.Dal.Contexts;
 using Tests.Dal.In;
+using Tests.Dal.Models;
 using Tests.Dal.Out;
 using Tests.Security.Authorization;
 using Tests.Utilities.Exceptions;
@@ -16,10 +20,14 @@ namespace Tests.WebApi.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly MainContext _context;
+        private readonly IMapper _mapper;
+        private readonly NotificationService _notificationService;
 
-        public ProfileController(MainContext context)
+        public ProfileController(MainContext context, IMapper mapper, NotificationService notificationService)
         {
             _context = context;
+            _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         [HttpPatch("Name")]
@@ -124,10 +132,23 @@ namespace Tests.WebApi.Controllers
 
         [HttpPatch("Notifications")]
         [Authorize(Policy = "ClientAdmin")]
-        public async Task UpdateNotifications([FromBody] InUpdateNotifications updatePassword)
+        public async Task UpdateNotifications([FromBody] InUpdateNotifications updateNotifications)
         {
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
 
+            var settings = new List<UserNotificationSetting>();
+
+            if (updateNotifications.Email != null)
+            {
+                settings.AddRange(_mapper.Map<List<UserNotificationSetting>>(updateNotifications.Email));
+            }
+
+            if (updateNotifications.Web != null)
+            {
+                settings.AddRange(_mapper.Map<List<UserNotificationSetting>>(updateNotifications.Web));
+            }
+
+            await _notificationService.UpdateNotificationSettings(authorizedUserModel.Id, settings);
         }
     }
 }

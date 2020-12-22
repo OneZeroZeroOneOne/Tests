@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
+using System.Linq;
 using Tests.Dal.In;
 using Tests.Dal.Models;
 using Tests.Dal.Models.Views;
@@ -38,6 +38,10 @@ namespace Tests.Dal
             CreateMap<Subscription, OutSubscriptionViewModel>().ForMember(x => x.Type, x => x.MapFrom(y => y.Type));
 
             CreateMap<PositionsWithCount, OutPositionsWithCount>();
+
+            CreateMap<InUpdateNotificationSetting, UserNotificationSetting>()
+                .ForMember(x => x.NotificationTargetTypeId, y=> y.MapFrom(x => x.TargetTypeId))
+                .ForMember(x => x.NotificationTypeId, y => y.MapFrom(x => x.TypeId));
         }
     }
 }

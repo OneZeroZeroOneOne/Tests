@@ -23,7 +23,7 @@ namespace Tests.Authorization.WebApi.Controllers
             User newUser = await _registerService.RegisterClientAdmin(inRegisterModel.Login, inRegisterModel.Password, inRegisterModel.Email, inRegisterModel.Name);
             var identity = JwtService.GetUserIdentity(newUser.Id, newUser.Role.Id);
             var jwtToken = JwtService.GenerateToken(identity);
-            return new OutAuthorizationViewModel() { Id = newUser.Id, RoleName = newUser.Role.Title, Token = jwtToken };
+            return new OutAuthorizationViewModel { Id = newUser.Id, RoleName = newUser.Role.Title, Token = jwtToken };
         }
     }
 }

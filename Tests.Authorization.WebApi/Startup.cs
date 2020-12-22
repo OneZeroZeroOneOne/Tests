@@ -31,19 +31,21 @@ namespace Tests.Authorization.WebApi
 
             services.AddControllers();
 
-            MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING"));
+            MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING") ?? "Host=104.248.250.163;Database=postgres;Username=postgres;Password=123456asdfg");
 
-            JwtOptions jwtOption = context.JwtOptions.FirstOrDefault();
+            var jwtOption = context.JwtOptions.FirstOrDefault();
 
             AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
 
             services.AddTransient<RegisterService>();
 
-            services.AddScoped(x => new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING")));
+            services.AddScoped(x => new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING") ?? "Host=104.248.250.163;Database=postgres;Username=postgres;Password=123456asdfg"));
 
             services.AddTransient<LoginService>();
 
             services.AddTransient<UserService>();
+
+            services.AddTransient<NotificationService>();
 
             services.AddSwaggerGen(c =>
             {

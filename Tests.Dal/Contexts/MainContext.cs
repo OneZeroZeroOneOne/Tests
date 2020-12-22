@@ -13,14 +13,16 @@ namespace Tests.Dal.Contexts
         {
             _connectionString = connectionString;
         }
-
+        public virtual DbSet<JwtOption> JwtOptions { get; set; }
         public virtual DbSet<Answer> Answer { get; set; }
         public virtual DbSet<AnswerTamplate> AnswerTamplate { get; set; }
         public virtual DbSet<Avatar> Avatar { get; set; }
         public virtual DbSet<DiscountType> DiscountType { get; set; }
         public virtual DbSet<Employee> Employee { get; set; }
-        public virtual DbSet<JwtOptions> JwtOptions { get; set; }
         public virtual DbSet<LongevityType> LongevityType { get; set; }
+        public virtual DbSet<Notification> Notifications { get; set; }
+        public virtual DbSet<NotificationTargetType> NotificationTargetTypes { get; set; }
+        public virtual DbSet<NotificationType> NotificationTypes { get; set; }
         public virtual DbSet<Position> Position { get; set; }
         public virtual DbSet<Question> Question { get; set; }
         public virtual DbSet<QuestionTemplate> QuestionTemplate { get; set; }
@@ -35,6 +37,7 @@ namespace Tests.Dal.Contexts
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserAnswer> UserAnswer { get; set; }
         public virtual DbSet<UserEmployee> UserEmployee { get; set; }
+        public virtual DbSet<UserNotificationSetting> UserNotificationSettings { get; set; }
         public virtual DbSet<UserQuiz> UserQuiz { get; set; }
         public virtual DbSet<UserSecurity> UserSecurity { get; set; }
         public virtual DbSet<Vacancy> Vacancy { get; set; }
@@ -141,8 +144,9 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("Employee_VacancyId_fkey");
             });
 
-            modelBuilder.Entity<JwtOptions>(entity =>
+            modelBuilder.Entity<JwtOption>(entity =>
             {
+                entity.ToTable("JwtOption");
                 entity.HasNoKey();
             });
 
@@ -425,6 +429,72 @@ namespace Tests.Dal.Contexts
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Vacancy_UserId_fkey");
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.NotificationId })
+                    .HasName("Notification_pkey");
+
+                entity.ToTable("Notification");
+
+                entity.HasOne(d => d.NotificationTargetType)
+                    .WithMany(p => p.Notifications)
+                    .HasForeignKey(d => d.NotificationTargetTypeId)
+                    .HasConstraintName("Notification_NotificationTargetTypeId_fkey");
+
+                entity.HasOne(d => d.NotificationType)
+                    .WithMany(p => p.Notifications)
+                    .HasForeignKey(d => d.NotificationTypeId)
+                    .HasConstraintName("Notification_NotificationTypeId_fkey");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Notifications)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Notification_UserId_fkey");
+            });
+
+            modelBuilder.Entity<NotificationTargetType>(entity =>
+            {
+                entity.HasKey(x => x.NotificationTargetTypeId);
+                entity.ToTable("NotificationTargetType");
+
+                entity.Property(e => e.NotificationTargetTypeId).ValueGeneratedNever();
+            });
+
+            modelBuilder.Entity<NotificationType>(entity =>
+            {
+                entity.HasKey(x => x.NotificationTypeId);
+                entity.ToTable("NotificationType");
+
+                entity.Property(e => e.NotificationTypeId).ValueGeneratedNever();
+            });
+
+            modelBuilder.Entity<UserNotificationSetting>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.NotificationTargetTypeId, e.NotificationTypeId })
+                    .HasName("UserNotificationSetting_pkey");
+
+                entity.ToTable("UserNotificationSetting");
+
+                entity.HasOne(d => d.NotificationTargetType)
+                    .WithMany(p => p.UserNotificationSettings)
+                    .HasForeignKey(d => d.NotificationTargetTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("UserNotificationSetting_NotificationTargetTypeId_fkey");
+
+                entity.HasOne(d => d.NotificationType)
+                    .WithMany(p => p.UserNotificationSettings)
+                    .HasForeignKey(d => d.NotificationTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("UserNotificationSetting_NotificationTypeId_fkey");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.UserNotificationSettings)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("UserNotificationSetting_UserId_fkey");
             });
 
             modelBuilder.HasSequence("positionid_seq");

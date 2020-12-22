@@ -23,7 +23,8 @@ namespace Tests.Dal.In
 
     public class InUpdateNotificationSetting
     {
-        public int NotificationTypeId { get; set; }
+        public int TargetTypeId { get; set; }
+        public int TypeId { get; set; }
         public bool IsEnabled { get; set; }
     }
 }
