@@ -6,11 +6,11 @@ services:
       context: .
       dockerfile: ./Dockerfile-authorization
     ports:
-      - "9000:8000"
+      - "${AUTHORIZATION_API_PORT_DEV}:8000"
     expose:
-      - "9000"
+      - "${AUTHORIZATION_API_PORT_DEV}"
     env_file:
-     - ./api.env
+     - ./.env
     environment: 
       - ASPNETCORE_ENVIRONMENT=Production
       
@@ -21,11 +21,11 @@ services:
     volumes:
       - /root/Files:/root/Files
     ports:
-      - "9001:8001"
+      - "${MANAGEMENT_API_PORT_DEV}:8001"
     expose:
-      - "9001"
+      - "${MANAGEMENT_API_PORT_DEV}"
     env_file:
-     - ./api.env
+     - ./.env
     environment: 
       - ASPNETCORE_ENVIRONMENT=Production
   
@@ -34,10 +34,10 @@ services:
       context: .
       dockerfile: ./Dockerfile-payments
     ports:
-      - "9002:8002"
+      - "${PAYMENTS_API_PORT_DEV}:8002"
     expose:
-      - "9002"
+      - "${PAYMENTS_API_PORT_DEV}"
     env_file:
-     - ./api.env
+     - ./.env
     environment: 
       - ASPNETCORE_ENVIRONMENT=Production
