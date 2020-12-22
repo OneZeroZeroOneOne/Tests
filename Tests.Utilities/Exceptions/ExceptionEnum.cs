@@ -19,5 +19,6 @@
         CompanyNameCantBeEmpty = 15,
         EmailCantBeEmpty = 16,
         PasswordCantBeEmpty = 17,
+        OldPasswordDontMatch = 18,
     }
 }

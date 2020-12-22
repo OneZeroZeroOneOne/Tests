@@ -13,6 +13,7 @@ namespace Tests.Dal.In
     }
     public class InUpdatePassword
     {
+        public string CurrentPassword { get; set; }
         public string Password { get; set; }
     }
     public class InUpdateNotifications

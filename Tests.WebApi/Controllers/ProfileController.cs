@@ -108,7 +108,10 @@ namespace Tests.WebApi.Controllers
                 throw ExceptionFactory.SoftException(ExceptionEnum.PasswordCantBeEmpty, "Password can't be empty");
 
             var user = await _context.User.Include(x => x.Role).Include(x => x.UserSecurity).Include(x => x.Avatar)
-                .FirstOrDefaultAsync(x => x.Id == authorizedUserModel.Id);
+                .FirstOrDefaultAsync(x => x.Id == authorizedUserModel.Id && x.UserSecurity.Password == updatePassword.CurrentPassword);
+
+            if (user == null)
+                throw ExceptionFactory.SoftException(ExceptionEnum.OldPasswordDontMatch, "Old password don't match");
 
             user.UserSecurity.Password = updatePassword.Password;
 
