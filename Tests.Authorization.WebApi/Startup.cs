@@ -33,7 +33,7 @@ namespace Tests.Authorization.WebApi
 
             MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING"));
 
-            JwtOptions jwtOption = context.JwtOptions.FirstOrDefault();
+            JwtOption jwtOption = context.JwtOption.FirstOrDefault();
 
             AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
 

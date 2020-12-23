@@ -14,13 +14,21 @@ namespace Tests.Dal.Contexts
             _connectionString = connectionString;
         }
 
+        public virtual DbSet<Adjective> Adjective { get; set; }
         public virtual DbSet<Answer> Answer { get; set; }
         public virtual DbSet<AnswerTamplate> AnswerTamplate { get; set; }
         public virtual DbSet<Avatar> Avatar { get; set; }
         public virtual DbSet<DiscountType> DiscountType { get; set; }
         public virtual DbSet<Employee> Employee { get; set; }
-        public virtual DbSet<JwtOptions> JwtOptions { get; set; }
+        public virtual DbSet<JwtOption> JwtOption { get; set; }
         public virtual DbSet<LongevityType> LongevityType { get; set; }
+        public virtual DbSet<Notification> Notification { get; set; }
+        public virtual DbSet<NotificationTargetType> NotificationTargetType { get; set; }
+        public virtual DbSet<NotificationType> NotificationType { get; set; }
+        public virtual DbSet<Noun> Noun { get; set; }
+        public virtual DbSet<Order> Order { get; set; }
+        public virtual DbSet<OrderStatus> OrderStatus { get; set; }
+        public virtual DbSet<OrderSubscription> OrderSubscription { get; set; }
         public virtual DbSet<Position> Position { get; set; }
         public virtual DbSet<Question> Question { get; set; }
         public virtual DbSet<QuestionTemplate> QuestionTemplate { get; set; }
@@ -35,10 +43,12 @@ namespace Tests.Dal.Contexts
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserAnswer> UserAnswer { get; set; }
         public virtual DbSet<UserEmployee> UserEmployee { get; set; }
+        public virtual DbSet<UserNotificationSetting> UserNotificationSetting { get; set; }
         public virtual DbSet<UserQuiz> UserQuiz { get; set; }
         public virtual DbSet<UserSecurity> UserSecurity { get; set; }
         public virtual DbSet<Vacancy> Vacancy { get; set; }
-        public virtual DbSet<PositionsWithCount> PositionsWithCounts { get; set; }
+        public virtual DbSet<Verb> Verb { get; set; }
+        public virtual DbSet<PositionsWithCount> PositionsWithCount { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -52,7 +62,14 @@ namespace Tests.Dal.Contexts
         {
             modelBuilder.HasAnnotation("Relational:Collation", "C.UTF-8");
 
-            modelBuilder.AddPositionWithCountView();
+            modelBuilder.Entity<Adjective>(entity =>
+            {
+                entity.ToTable("Adjective");
+
+                entity.Property(e => e.Json)
+                    .IsRequired()
+                    .HasColumnType("json");
+            });
 
             modelBuilder.Entity<Answer>(entity =>
             {
@@ -68,11 +85,14 @@ namespace Tests.Dal.Contexts
             {
                 entity.ToTable("AnswerTamplate");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id).HasDefaultValueSql("nextval('\"AnswerTemplate_Id_seq\"'::regclass)");
+
+                entity.Property(e => e.Text).IsRequired();
 
                 entity.HasOne(d => d.QuestionTamplate)
                     .WithMany(p => p.AnswerTamplates)
                     .HasForeignKey(d => d.QuestionTamplateId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("AnswerTamplate_QuestionTamplateId_fkey");
             });
 
@@ -118,8 +138,6 @@ namespace Tests.Dal.Contexts
                     .IsRequired()
                     .HasMaxLength(255);
 
-                entity.Property(x => x.DateOfBirth);
-
                 entity.HasOne(d => d.Avatar)
                     .WithMany(p => p.Employees)
                     .HasForeignKey(d => d.AvatarId)
@@ -141,9 +159,11 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("Employee_VacancyId_fkey");
             });
 
-            modelBuilder.Entity<JwtOptions>(entity =>
+            modelBuilder.Entity<JwtOption>(entity =>
             {
                 entity.HasNoKey();
+
+                entity.ToTable("JwtOption");
             });
 
             modelBuilder.Entity<LongevityType>(entity =>
@@ -151,6 +171,111 @@ namespace Tests.Dal.Contexts
                 entity.ToTable("LongevityType");
 
                 entity.Property(e => e.LongevityMeasureName).IsRequired();
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.NotificationId })
+                    .HasName("Notification_pkey");
+
+                entity.ToTable("Notification");
+
+                entity.HasOne(d => d.NotificationTargetType)
+                    .WithMany(p => p.Notifications)
+                    .HasForeignKey(d => d.NotificationTargetTypeId)
+                    .HasConstraintName("Notification_NotificationTargetTypeId_fkey");
+
+                entity.HasOne(d => d.NotificationType)
+                    .WithMany(p => p.Notifications)
+                    .HasForeignKey(d => d.NotificationTypeId)
+                    .HasConstraintName("Notification_NotificationTypeId_fkey");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Notifications)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Notification_UserId_fkey");
+            });
+
+            modelBuilder.Entity<NotificationTargetType>(entity =>
+            {
+                entity.ToTable("NotificationTargetType");
+
+                entity.Property(e => e.NotificationTargetTypeId).ValueGeneratedNever();
+            });
+
+            modelBuilder.Entity<NotificationType>(entity =>
+            {
+                entity.ToTable("NotificationType");
+
+                entity.Property(e => e.NotificationTypeId).ValueGeneratedNever();
+            });
+
+            modelBuilder.Entity<Noun>(entity =>
+            {
+                entity.ToTable("Noun");
+
+                entity.Property(e => e.Json)
+                    .IsRequired()
+                    .HasColumnType("json");
+            });
+
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.UserId })
+                    .HasName("Order_pkey");
+
+                entity.ToTable("Order");
+
+                entity.HasIndex(e => e.Id, "Order_Id_key")
+                    .IsUnique();
+
+                entity.Property(e => e.CreatedDateTime).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(d => d.Status)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.StatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Order_StatusId_fkey");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Orders)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Order_UserId_fkey");
+            });
+
+            modelBuilder.Entity<OrderStatus>(entity =>
+            {
+                entity.ToTable("OrderStatus");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Name).IsRequired();
+            });
+
+            modelBuilder.Entity<OrderSubscription>(entity =>
+            {
+                entity.HasKey(e => new { e.SubscriptionId, e.OrderId })
+                    .HasName("OrderSubscription_pkey");
+
+                entity.ToTable("OrderSubscription");
+
+                entity.Property(e => e.CreatedDateTime).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(d => d.Order)
+                    .WithMany(p => p.OrderSubscriptions)
+                    .HasPrincipalKey(p => p.Id)
+                    .HasForeignKey(d => d.OrderId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("OrderSubscription_OrderId_fkey");
+
+                entity.HasOne(d => d.Subscription)
+                    .WithMany(p => p.OrderSubscriptions)
+                    .HasPrincipalKey(p => p.Id)
+                    .HasForeignKey(d => d.SubscriptionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("OrderSubscription_SubscriptionId_fkey");
             });
 
             modelBuilder.Entity<Position>(entity =>
@@ -188,8 +313,6 @@ namespace Tests.Dal.Contexts
             modelBuilder.Entity<QuestionTemplate>(entity =>
             {
                 entity.ToTable("QuestionTemplate");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.HasOne(d => d.QuestionType)
                     .WithMany(p => p.QuestionTemplates)
@@ -312,6 +435,11 @@ namespace Tests.Dal.Contexts
 
                 entity.Property(e => e.Name).IsRequired();
 
+                entity.HasOne(d => d.Avatar)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.AvatarId)
+                    .HasConstraintName("User_AvatarId_fkey");
+
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.RoleId)
@@ -364,6 +492,32 @@ namespace Tests.Dal.Contexts
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("UserEmployee_UserId_fkey");
+            });
+
+            modelBuilder.Entity<UserNotificationSetting>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.NotificationTargetTypeId, e.NotificationTypeId })
+                    .HasName("UserNotificationSetting_pkey");
+
+                entity.ToTable("UserNotificationSetting");
+
+                entity.HasOne(d => d.NotificationTargetType)
+                    .WithMany(p => p.UserNotificationSettings)
+                    .HasForeignKey(d => d.NotificationTargetTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("UserNotificationSetting_NotificationTargetTypeId_fkey");
+
+                entity.HasOne(d => d.NotificationType)
+                    .WithMany(p => p.UserNotificationSettings)
+                    .HasForeignKey(d => d.NotificationTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("UserNotificationSetting_NotificationTypeId_fkey");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.UserNotificationSettings)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("UserNotificationSetting_UserId_fkey");
             });
 
             modelBuilder.Entity<UserQuiz>(entity =>
@@ -423,9 +577,37 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("Vacancy_UserId_fkey");
             });
 
+            modelBuilder.Entity<Verb>(entity =>
+            {
+                entity.ToTable("Verb");
+
+                entity.Property(e => e.Json)
+                    .IsRequired()
+                    .HasColumnType("json");
+            });
+
+            modelBuilder.Entity<PositionsWithCount>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToTable("View_GetPositionsWithCount");
+            });
+
+            modelBuilder.HasSequence("Adjective_Id_seq");
+
+            modelBuilder.HasSequence("AnswerTemplate_Id_seq");
+
+            modelBuilder.HasSequence("Noun_Id_seq");
+
+            modelBuilder.HasSequence("NounCases_Id_seq");
+
             modelBuilder.HasSequence("positionid_seq");
 
             modelBuilder.HasSequence("PositionId_seq");
+
+            modelBuilder.HasSequence("QuestionTemplate_Id_seq");
+
+            modelBuilder.HasSequence("Verb_Id_seq");
 
             OnModelCreatingPartial(modelBuilder);
         }

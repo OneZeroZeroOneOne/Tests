@@ -32,7 +32,7 @@ namespace Tests.Bll.Services
 
         public async Task<List<PositionsWithCount>> GetUserPositionsWithCount(int adminId)
         {
-            return await _context.PositionsWithCounts.Where(x => x.UserId == adminId).ToListAsync();
+            return await _context.PositionsWithCount.Where(x => x.UserId == adminId).ToListAsync();
         }
     }
 }

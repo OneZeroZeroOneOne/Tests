@@ -51,8 +51,43 @@ namespace Tests.Bll.Services
                 EmployeeId = empId,
             });
             await _context.SaveChangesAsync();
-            return await _context.Quiz.Include(x => x.Status).FirstOrDefaultAsync(x => x.Id == newQuiz.Id);
+            List<QuestionTemplate> questionTemplates = await _context.QuestionTemplate.Include(x => x.AnswerTamplates).OrderBy(r => Guid.NewGuid()).Take(20).ToListAsync();
+            List<Question> questions = new List<Question>(); 
+            /*for(int i = 0; i < questionTemplates.Count; i++)
+            {
+                List<Verb> verbs = new List<Verb>();
+                List<Adjective> adjectives = new List<Adjective>();
+                List<Noun> nouns = new List<Noun>();
+                for(int j = 0; j < questionTemplates[i].Text.Length; j++)
+                {
+
+                    if(questionTemplates[i].Text[j] == '{')
+                    {
+                        var wordDescr = questionTemplates[i].Text.Substring(j, questionTemplates[i].Text.Substring(j).First(x => x == '}'));
+                        int wordId = questionTemplates[i].Text[j];
+                    }
+                }
+                questions.Add(await GenerateQuestion(questionTemplates[i]));
+            }*/
+            return await _context.Quiz.Include(x => x.Status).Include(x => x.Questions).FirstOrDefaultAsync(x => x.Id == newQuiz.Id);
         }
+
+
+        /*public async Task<Question> GenerateQuestion(QuestionTemplate questionTemplate)
+        {
+            int startReplaceIndex = 0;
+            int endReplaceIndex = 0;
+            string langPart = "";
+            
+            for (int i = 0; i < questionTemplate.Text.Length; i++)
+            {
+                if(questionTemplate.Text[i] == '{') 
+                {
+                    int startReplaceIndex = i;
+                }
+
+            }
+        }*/
 
         public async Task<List<Quiz>> GetEmployeeQuizzes(int empId, int userId)
         {

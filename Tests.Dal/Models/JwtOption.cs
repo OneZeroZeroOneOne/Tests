@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Tests.Dal.Models
 {
-    public partial class JwtOptions
+    public partial class JwtOption
     {
         public string Issuer { get; set; }
         public string Audience { get; set; }
