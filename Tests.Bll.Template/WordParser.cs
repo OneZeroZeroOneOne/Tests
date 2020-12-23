@@ -8,6 +8,7 @@ namespace Tests.Bll.Template
     public class WordParser
     {
         private readonly string _template;
+        private Scriban.Template _buildTemplate;
         private List<Word> _words;
 
         public WordParser(string template)
@@ -21,7 +22,8 @@ namespace Tests.Bll.Template
             var doc = new HtmlDocument();
             doc.LoadHtml(_template);
             _words = new List<Word>();
-            foreach(var node in doc.DocumentNode.ChildNodes.Where(x => x.NodeType == HtmlNodeType.Element))
+
+            foreach(var node in doc.DocumentNode.ChildNodes.Where(x => x.NodeType == HtmlNodeType.Element).ToList())
             {
                 if (!Enum.TryParse<WordTypeEnum>(node.Name, true, out var wordType)) continue;
 
@@ -30,7 +32,7 @@ namespace Tests.Bll.Template
                     WordType = wordType,
                     Id = int.Parse(node.Attributes.FirstOrDefault(x => x.Name == "id")?.Value ?? string.Empty),
                     StartPosition = node.LinePosition,
-                    EndPosition = node.LinePosition + node.OuterHtml.Length
+                    TagLength = node.OuterHtml.Length
                 };
 
                 switch (word.WordType)
@@ -87,18 +89,49 @@ namespace Tests.Bll.Template
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        continue;
                 }
+
+                node.ParentNode.ReplaceChild(HtmlNode.CreateNode($"{{{{word_{word.Id}}}}}"), node);
 
                 _words.Add(word);
             }
+
+            _buildTemplate = Scriban.Template.Parse(doc.DocumentNode.InnerHtml);
         }
 
         public string Render()
         {
-            var renderedString = "";
+            var templateDataObject = new Dictionary<string, string>();
 
-            return renderedString;
+            foreach (var word in _words.Distinct(new WordComparer()))
+            {
+                switch (word.WordType)
+                {
+                    case WordTypeEnum.Noun:
+                        templateDataObject.Add($"word_{word.Id}", WordResolver.Resolve(word));
+                        break;
+                    case WordTypeEnum.Verb:
+                        templateDataObject.Add($"word_{word.Id}", WordResolver.Resolve(word));
+                        break;
+                    case WordTypeEnum.Adjective:
+                        templateDataObject.Add($"word_{word.Id}", WordResolver.Resolve(word));
+                        break;
+                    default:
+                        continue;
+                }
+            }
+
+            return _buildTemplate.Render(templateDataObject);
+        }
+    }
+
+    public static class WordResolver
+    {
+        public static string Resolve(Word word)
+        {
+            return new List<string> {"Блампс", "Космический жук", "Бамбукл", "Тестер"}.OrderBy(x => Guid.NewGuid())
+                .First();
         }
     }
 }
