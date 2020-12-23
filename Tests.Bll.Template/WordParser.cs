@@ -2,63 +2,103 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Tests.Bll.Template
 {
-    public static class WordParser
+    public class WordParser
     {
-        public static List<Word> Parse(string htmlWordString)
+        private readonly string _template;
+        private List<Word> _words;
+
+        public WordParser(string template)
+        {
+            _template = template;
+            Parse();
+        }
+
+        private void Parse()
         {
             var doc = new HtmlDocument();
-            doc.LoadHtml(htmlWordString);
-            List<Word> words = new List<Word>();
-            foreach(var node in doc.DocumentNode.ChildNodes)
+            doc.LoadHtml(_template);
+            _words = new List<Word>();
+            foreach(var node in doc.DocumentNode.ChildNodes.Where(x => x.NodeType == HtmlNodeType.Element))
             {
-                if(node.NodeType == HtmlNodeType.Element)
+                if (!Enum.TryParse<WordTypeEnum>(node.Name, true, out var wordType)) continue;
+
+                var word = new Word
                 {
-                    Word word = new Word();
-                    if (Enum.TryParse<WordTypeEnum>(node.Name, true, out var wordType))
-                    {
-                        word.WordType = wordType;
-                        word.Id = int.Parse(node.Attributes.FirstOrDefault(x => x.Name == "id").Value);
-                        word.StartPosition = node.LinePosition;
-                        word.EndPosition = node.LinePosition + node.OuterHtml.Length;
-                        switch (word.WordType)
+                    WordType = wordType,
+                    Id = int.Parse(node.Attributes.FirstOrDefault(x => x.Name == "id")?.Value ?? string.Empty),
+                    StartPosition = node.LinePosition,
+                    EndPosition = node.LinePosition + node.OuterHtml.Length
+                };
+
+                switch (word.WordType)
+                {
+                    case WordTypeEnum.Adjective:
+                        if (!Enum.TryParse<GenderEnum>(node.Attributes.FirstOrDefault(x => x.Name == "gender")?.Value, true, out var gender))
+                            throw new Exception($"Can't parse GenderEnum in {_template} id: {word.Id}");
+
+                        if  (!Enum.TryParse<AmountEnum>(node.Attributes.FirstOrDefault(x => x.Name == "amount")?.Value, true, out var amount))
+                            throw new Exception($"Can't parse AmountEnum in {_template} id: {word.Id}");
+
+                        if (!Enum.TryParse<DeclensionEnum>(node.Attributes.FirstOrDefault(x => x.Name == "declension")?.Value, true, out var declensionVal))
+                            throw new Exception("Can't parse DeclensionEnum in {htmlWordString} id: {word.Id}");
+
+                        word.Gender = gender;
+                        word.Amount = amount;
+                        word.Declension = declensionVal;
+                        break;
+
+                    case WordTypeEnum.Noun:
+                        if (!Enum.TryParse<AmountEnum>(node.Attributes.FirstOrDefault(x => x.Name == "amount")?.Value, true, out var amountVals))
+                            throw new Exception($"Can't parse AmountEnum in {_template} id: {word.Id}");
+
+                        if (!Enum.TryParse<DeclensionEnum>(node.Attributes.FirstOrDefault(x => x.Name == "declension")?.Value, true, out var declension))
+                            throw new Exception("Can't parse DeclensionEnum in {htmlWordString} id: {word.Id}");
+
+                        word.Amount = amountVals;
+                        word.Declension = declension;
+                        break;
+
+                    case WordTypeEnum.Verb:
+                        if (!Enum.TryParse<TimeEnum>(node.Attributes.FirstOrDefault(x => x.Name == "time")?.Value, true, out var time))
+                            throw new Exception($"Can't parse TimeEnum in {_template} id: {word.Id}");
+
+                        if (!Enum.TryParse<AmountEnum>(node.Attributes.FirstOrDefault(x => x.Name == "amount")?.Value, true, out var amountVal))
+                            throw new Exception($"Can't parse AmountEnum in {_template} id: {word.Id}");
+
+                        word.Time = time;
+                        word.Amount = amountVal;
+                        if (word.Time == TimeEnum.Past)
                         {
-                            case WordTypeEnum.Adjective:
-                                word.Gender = node.Attributes.FirstOrDefault(x => x.Name == "gender").Value;
-                                word.Amount = node.Attributes.FirstOrDefault(x => x.Name == "amount").Value;
-                                word.Declension = node.Attributes.FirstOrDefault(x => x.Name == "declension").Value;
-                                break;
+                            if(word.Amount == AmountEnum.Alone)
+                            {
+                                if (!Enum.TryParse<GenderEnum>(node.Attributes.FirstOrDefault(x => x.Name == "gender")?.Value, true, out var genderVal))
+                                    throw new Exception($"Can't parse GenderEnum in {_template} id: {word.Id}");
 
-                            case WordTypeEnum.Noun:
-                                word.Amount = node.Attributes.FirstOrDefault(x => x.Name == "amount").Value;
-                                word.Declension = node.Attributes.FirstOrDefault(x => x.Name == "declension").Value;
-                                break;
-
-                            case WordTypeEnum.Verb:
-                                word.Time = node.Attributes.FirstOrDefault(x => x.Name == "time").Value;
-                                word.Amount = node.Attributes.FirstOrDefault(x => x.Name == "amount").Value;
-                                if (word.Time == "Past")
-                                {
-                                    if(word.Amount == "alone")
-                                    {
-                                        word.Gender = node.Attributes.FirstOrDefault(x => x.Name == "gender").Value;
-                                    }
-                                }
-                                else
-                                {
-                                    word.Person = int.Parse(node.Attributes.FirstOrDefault(x => x.Name == "person").Value);
-                                }
-                                break;
-
+                                word.Gender = genderVal;
+                            }
                         }
-                        words.Add(word);
-                    }
+                        else
+                        {
+                            word.Person = int.Parse(node.Attributes.FirstOrDefault(x => x.Name == "person")?.Value ?? string.Empty);
+                        }
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
+
+                _words.Add(word);
             }
-            return words;
+        }
+
+        public string Render()
+        {
+            var renderedString = "";
+
+            return renderedString;
         }
     }
 }
