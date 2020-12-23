@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using Tests.Bll.Template;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
 using Tests.Utilities.Exceptions;
@@ -51,43 +53,91 @@ namespace Tests.Bll.Services
                 EmployeeId = empId,
             });
             await _context.SaveChangesAsync();
-            List<QuestionTemplate> questionTemplates = await _context.QuestionTemplate.Include(x => x.AnswerTamplates).OrderBy(r => Guid.NewGuid()).Take(20).ToListAsync();
+            List<QuestionTemplate> questionTemplates = await _context.QuestionTemplate.Include(x => x.AnswerTamplates).Take(20).ToListAsync();
             List<Question> questions = new List<Question>(); 
-            /*for(int i = 0; i < questionTemplates.Count; i++)
+            for(int i = 0; i < questionTemplates.Count; i++)
             {
-                List<Verb> verbs = new List<Verb>();
-                List<Adjective> adjectives = new List<Adjective>();
-                List<Noun> nouns = new List<Noun>();
-                for(int j = 0; j < questionTemplates[i].Text.Length; j++)
+                int adjectivesCount = 0;
+                int verbsCount = 0;
+                WordParser wordParser = new WordParser(questionTemplates[i].Text);
+                Dictionary<int, WordTypeEnum> numberWordTypeData = new Dictionary<int, WordTypeEnum>();
+                //Dictionary<int, List<Verb>> verbs = new Dictionary<int, List<Verb>>();
+                //Dictionary<int, List<Adjective>> adjectives = new Dictionary<int, List<Adjective>>();
+                Dictionary<int, List<Noun>> nouns = new Dictionary<int, List<Noun>>();
+                foreach (var word in wordParser._templateDataObject)
                 {
-
-                    if(questionTemplates[i].Text[j] == '{')
+                    if (!numberWordTypeData.TryGetValue(word.Value.WordNumber, out var wordTypeEnum))
                     {
-                        var wordDescr = questionTemplates[i].Text.Substring(j, questionTemplates[i].Text.Substring(j).First(x => x == '}'));
-                        int wordId = questionTemplates[i].Text[j];
+                        numberWordTypeData.Add(word.Value.WordNumber, word.Value.WordType);
+                        switch (word.Value.WordType)
+                        {
+                            case WordTypeEnum.Adjective:
+                                adjectivesCount = adjectivesCount + 1;
+                                //adjectives[word.Value.WordNumber].Add(await _context.Adjective.FirstOrDefaultAsync());
+                                break;
+
+                            case WordTypeEnum.Verb:
+                                verbsCount = verbsCount + 1;
+                                //verbs[word.Value.WordNumber].Add(await _context.Verb.FirstOrDefaultAsync());
+                                break;
+
+                            case WordTypeEnum.Noun:
+                                nouns[word.Value.WordNumber].Add(await _context.Noun.FirstOrDefaultAsync(x => x.Gender == word.Value.Gender.ToString()));
+                                break;
+                        }
                     }
                 }
-                questions.Add(await GenerateQuestion(questionTemplates[i]));
-            }*/
+                //GenerateQuestion(wordParser._parsedTemplate, wordParser._templateDataObject, numberWordTypeData, verbs, adjectives, nouns);
+            }
             return await _context.Quiz.Include(x => x.Status).Include(x => x.Questions).FirstOrDefaultAsync(x => x.Id == newQuiz.Id);
         }
 
 
-        /*public async Task<Question> GenerateQuestion(QuestionTemplate questionTemplate)
+        public int GenerateQuestion(string template, Dictionary<string, Word> templateDataObjects, Dictionary<int, WordTypeEnum> numberWordTypeData, List<Verb> verbs, List<Adjective> adjectives, List<Noun> nouns)
         {
-            int startReplaceIndex = 0;
-            int endReplaceIndex = 0;
-            string langPart = "";
-            
-            for (int i = 0; i < questionTemplate.Text.Length; i++)
+            Dictionary<int, int> relationVerbs = new Dictionary<int, int>();
+            int verbsIndex = 0;
+            Dictionary<int, int> relationAdjectives = new Dictionary<int, int>();
+            int adjectivesIndex = 0;
+            Dictionary<int, int> relationNouns = new Dictionary<int, int>();
+            int nounsIndex = 0;
+            foreach(var numberWordType in numberWordTypeData)
             {
-                if(questionTemplate.Text[i] == '{') 
+                if(numberWordType.Value == WordTypeEnum.Adjective)
                 {
-                    int startReplaceIndex = i;
+                    relationAdjectives.Add(numberWordType.Key, adjectivesIndex);
+                    adjectivesIndex = adjectivesIndex + 1;
                 }
-
+                if (numberWordType.Value == WordTypeEnum.Verb)
+                {
+                    relationVerbs.Add(numberWordType.Key, verbsIndex);
+                    verbsIndex = verbsIndex + 1;
+                }
+                if (numberWordType.Value == WordTypeEnum.Noun)
+                {
+                    relationNouns.Add(numberWordType.Key, nounsIndex);
+                    nounsIndex = nounsIndex + 1;
+                }
             }
-        }*/
+            foreach(var word in templateDataObjects)
+            {
+                string replacedWord = "";
+                if (word.Value.WordType == WordTypeEnum.Adjective)
+                {
+
+                }
+                if (word.Value.WordType == WordTypeEnum.Verb)
+                {
+
+                }
+                if (word.Value.WordType == WordTypeEnum.Noun)
+                {
+
+                }
+                //template = template.Replace($"{{{word.Key}}}", )
+            }
+            return 1;
+        }
 
         public async Task<List<Quiz>> GetEmployeeQuizzes(int empId, int userId)
         {

@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Tests.Bll.Template\Tests.Bll.Template.csproj" />
     <ProjectReference Include="..\Tests.Dal\Tests.Dal.csproj" />
     <ProjectReference Include="..\Tests.Utilities\Tests.Utilities.csproj" />
   </ItemGroup>

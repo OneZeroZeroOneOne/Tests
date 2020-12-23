@@ -14,7 +14,7 @@
 
     public enum GenderEnum
     {
-        Neuther,
+        Neuther,Man,Woman
     }
 
     public enum AmountEnum
@@ -24,6 +24,6 @@
 
     public enum DeclensionEnum
     {
-        Nominative,
+        Nominative, Genitive, Dative, Accusative, Instrumental, Prepositional
     }
 }

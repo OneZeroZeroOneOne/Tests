@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Tests.Bll.Template
 {
     public class Word
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
+        public int WordNumber { get; set; }
         public int StartPosition { get; set; }
         public int EndPosition => StartPosition + TagLength;
         public int TagLength { get; set; }

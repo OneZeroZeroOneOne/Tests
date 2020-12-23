@@ -6,10 +6,9 @@ namespace Tests.DeleteThis
     {
         static void Main(string[] args)
         {
-            string question = "<adjective id=\"1\" gender=\"Neuther\" amount=\"many\" declension=\"Nominative\"></adjective> <noun id=\"2\" amount=\"many\" declension=\"Nominative\"></noun> — это <noun id=\"3\" amount=\"many\" declension=\"Nominative\"></noun>. Не все <adjective id=\"1\" gender=\"Neuther\" amount=\"many\" declension=\"Nominative\"></adjective> <noun id=\"2\" amount=\"many\" declension=\"Nominative\"></noun> <verb id=\"4\" time=\"Present\" amount=\"many\" person=\"3\"></verb> в темноте.";
-            var words = new WordParser(question);
+            string question = "<adjective wordnumber=\"1\" gender=\"Neuther\" amount=\"many\" declension=\"Nominative\"></adjective> <noun wordnumber=\"2\" amount=\"many\" declension=\"Nominative\"></noun> — это <noun wordnumber=\"3\" amount=\"many\" declension=\"Nominative\"></noun>. Не все <adjective wordnumber=\"1\" gender=\"Neuther\" amount=\"many\" declension=\"Nominative\"></adjective> <noun wordnumber=\"2\" amount=\"many\" declension=\"Nominative\"></noun> <verb wordnumber=\"4\" time=\"Present\" amount=\"many\" person=\"3\"></verb> в темноте.";
+            WordParser words = new WordParser(question);
 
-            var questionText = words.Render();
         }
     }
 }

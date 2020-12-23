@@ -60,6 +60,7 @@ namespace Tests.Dal.Contexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.AddPositionWithCountView();
             modelBuilder.HasAnnotation("Relational:Collation", "C.UTF-8");
 
             modelBuilder.Entity<Adjective>(entity =>
@@ -164,6 +165,12 @@ namespace Tests.Dal.Contexts
                 entity.HasNoKey();
 
                 entity.ToTable("JwtOption");
+
+                entity.Property(e => e.Audience).IsRequired();
+
+                entity.Property(e => e.Issuer).IsRequired();
+
+                entity.Property(e => e.Key).IsRequired();
             });
 
             modelBuilder.Entity<LongevityType>(entity =>
@@ -214,6 +221,8 @@ namespace Tests.Dal.Contexts
             modelBuilder.Entity<Noun>(entity =>
             {
                 entity.ToTable("Noun");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Json)
                     .IsRequired()
@@ -586,7 +595,7 @@ namespace Tests.Dal.Contexts
                     .HasColumnType("json");
             });
 
-            modelBuilder.Entity<PositionsWithCount>(entity =>
+            modelBuilder.Entity<ViewGetPositionsWithCount>(entity =>
             {
                 entity.HasNoKey();
 
