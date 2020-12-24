@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Tests.Dal.Contexts;
 using Tests.Dal.Enums;
 using Tests.Dal.Models;
+using Tests.Dal.Out;
 
 namespace Tests.Bll.Services
 {
@@ -83,15 +84,55 @@ namespace Tests.Bll.Services
                 .Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task<List<Notification>> GetUserNotification(int userId, int targetTypeId, bool? isSeen)
+        public async Task<IEnumerable<OutNotificationViewModel>> GetUserNotification(int userId, int targetTypeId, bool? isSeen)
         {
-            var notificationQuery = _mainContext.Notification
-                .Where(x => x.NotificationTargetTypeId == targetTypeId && x.UserId == userId);
+            var notificationQuery = (
+                from notification in _mainContext.Notification
+                join user in _mainContext.Employee on notification.FromUserId equals user.Id into un
+                from subUser in un.DefaultIfEmpty()
+                join avatar in _mainContext.Avatar on subUser.AvatarId equals avatar.Id into au
+                from subAvatar in au.DefaultIfEmpty()
+                where notification.NotificationTargetTypeId == targetTypeId && notification.UserId == userId
+                select new
+                {
+                    Notification = notification,
+                    FromUser = subUser,
+                    Avatar = subAvatar,
+                });
 
             if (isSeen != null)
-                notificationQuery = notificationQuery.Where(x => x.IsSeen == isSeen);
+                notificationQuery = notificationQuery.Where(x => x.Notification.IsSeen == isSeen);
 
-            return await notificationQuery.OrderByDescending(x => x.CreatedDateTime).ToListAsync();
+            return (await notificationQuery.OrderByDescending(x => x.Notification.CreatedDateTime).ToListAsync())
+                .Select(x => new OutNotificationViewModel
+                {
+                    ArchivedDateTime = x.Notification.ArchivedDateTime,
+                    CreatedDateTime = x.Notification.CreatedDateTime,
+                    FromUser = x.FromUser != null ? new OutEmployeeViewModel
+                    {
+                        FirstName = x.FromUser.FirstName,
+                        MiddleName = x.FromUser.MiddleName,
+                        SurName = x.FromUser.SurName,
+                        Avatar = x.Avatar != null ? new OutAvatarViewModel
+                        {
+                            Id = x.Avatar.Id,
+                            Name = x.Avatar.Name,
+                            Path = x.Avatar.Path
+                        } : null,
+                        Email = x.FromUser.Email,
+                        DateOfBirth = x.FromUser.DateOfBirth,
+                        IsCandidate = x.FromUser.IsCandidate,
+                        
+                    } : null,
+                    IsSeen = x.Notification.IsSeen,
+                    ModifiedDateTime = x.Notification.ModifiedDateTime,
+                    NotificationContent = x.Notification.NotificationContent,
+                    NotificationTargetTypeId = x.Notification.NotificationTargetTypeId,
+                    NotificationId = x.Notification.NotificationId,
+                    NotificationTypeId = x.Notification.NotificationTypeId,
+                    SeenDateTime = x.Notification.SeenDateTime,
+                    UserId = x.Notification.UserId,
+                });
         }
 
         public async Task<Notification> MarkAsSeen(int id, Guid notificationId)

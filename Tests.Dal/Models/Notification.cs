@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 #nullable disable
 
@@ -17,6 +16,7 @@ namespace Tests.Dal.Models
         public DateTime? ModifiedDateTime { get; set; }
         public DateTime? ArchivedDateTime { get; set; }
         public DateTime? SeenDateTime { get; set; }
+        public int? FromUserId { get; set; }
 
         public virtual NotificationTargetType NotificationTargetType { get; set; }
         public virtual NotificationType NotificationType { get; set; }

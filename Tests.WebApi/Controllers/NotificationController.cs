@@ -61,7 +61,7 @@ namespace Tests.WebApi.Controllers
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
             var notifications = await _notificationService.GetUserNotification(authorizedUserModel.Id, targetTypeId, isSeen);
 
-            return _mapper.Map<List<OutNotificationViewModel>>(notifications);
+            return notifications.ToList();
         }
 
         [HttpPost("{notificationId}")]

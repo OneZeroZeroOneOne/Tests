@@ -14,5 +14,7 @@ namespace Tests.Dal.Out
         public DateTime? ModifiedDateTime { get; set; }
         public DateTime? ArchivedDateTime { get; set; }
         public DateTime? SeenDateTime { get; set; }
+
+        public OutEmployeeViewModel FromUser { get; set; }
     }
 }
