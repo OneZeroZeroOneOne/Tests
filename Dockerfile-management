@@ -6,7 +6,7 @@ COPY Tests.Dal/*.csproj Tests.Dal/
 COPY Tests.Bll/*.csproj Tests.Bll/
 COPY Tests.Security/*.csproj Tests.Security/
 COPY Tests.Utilities/*.csproj Tests.Utilities/
-COPY Tests.Template/*.csproj Tests.Template/
+COPY Tests.Bll.Template/*.csproj Tests.Bll.Template/
 
 RUN dotnet restore Tests.WebApi/Tests.WebApi.csproj
 
@@ -15,7 +15,7 @@ COPY Tests.Dal/ Tests.Dal/
 COPY Tests.Bll/ Tests.Bll/
 COPY Tests.Security/ Tests.Security/
 COPY Tests.Utilities/ Tests.Utilities/
-COPY Tests.Template/ Tests.Template/
+COPY Tests.Bll.Template/ Tests.Bll.Template/
 WORKDIR /source/Tests.WebApi
 RUN dotnet build -c release
 
