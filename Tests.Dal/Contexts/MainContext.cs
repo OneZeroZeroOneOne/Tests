@@ -595,12 +595,6 @@ namespace Tests.Dal.Contexts
                     .HasColumnType("json");
             });
 
-            modelBuilder.Entity<ViewGetPositionsWithCount>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToTable("View_GetPositionsWithCount");
-            });
 
             modelBuilder.HasSequence("Adjective_Id_seq");
 

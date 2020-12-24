@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -54,89 +57,123 @@ namespace Tests.Bll.Services
             });
             await _context.SaveChangesAsync();
             List<QuestionTemplate> questionTemplates = await _context.QuestionTemplate.Include(x => x.AnswerTamplates).Take(20).ToListAsync();
-            List<Question> questions = new List<Question>(); 
-            for(int i = 0; i < questionTemplates.Count; i++)
+            List<Question> questions = new List<Question>();
+            for (int i = 0; i < questionTemplates.Count; i++)
             {
-                int adjectivesCount = 0;
-                int verbsCount = 0;
-                WordParser wordParser = new WordParser(questionTemplates[i].Text);
-                Dictionary<int, WordTypeEnum> numberWordTypeData = new Dictionary<int, WordTypeEnum>();
-                //Dictionary<int, List<Verb>> verbs = new Dictionary<int, List<Verb>>();
-                //Dictionary<int, List<Adjective>> adjectives = new Dictionary<int, List<Adjective>>();
-                Dictionary<int, List<Noun>> nouns = new Dictionary<int, List<Noun>>();
-                foreach (var word in wordParser._templateDataObject)
+                List<Answer> answers = new List<Answer>();
+                foreach (var answerTamplate in questionTemplates[i].AnswerTamplates)
                 {
-                    if (!numberWordTypeData.TryGetValue(word.Value.WordNumber, out var wordTypeEnum))
+                    WordParser answerWordParser = new WordParser(answerTamplate.Text);
+                    answers.Add(new Answer
                     {
-                        numberWordTypeData.Add(word.Value.WordNumber, word.Value.WordType);
-                        switch (word.Value.WordType)
-                        {
-                            case WordTypeEnum.Adjective:
-                                adjectivesCount = adjectivesCount + 1;
-                                //adjectives[word.Value.WordNumber].Add(await _context.Adjective.FirstOrDefaultAsync());
-                                break;
-
-                            case WordTypeEnum.Verb:
-                                verbsCount = verbsCount + 1;
-                                //verbs[word.Value.WordNumber].Add(await _context.Verb.FirstOrDefaultAsync());
-                                break;
-
-                            case WordTypeEnum.Noun:
-                                nouns[word.Value.WordNumber].Add(await _context.Noun.FirstOrDefaultAsync(x => x.Gender == word.Value.Gender.ToString()));
-                                break;
-                        }
-                    }
+                        Text = await GenerateText(answerWordParser.parsedTemplate, answerWordParser.templateDataObject),
+                        CreateDateTime = DateTime.Now,
+                    });
                 }
-                //GenerateQuestion(wordParser._parsedTemplate, wordParser._templateDataObject, numberWordTypeData, verbs, adjectives, nouns);
+                WordParser questionWordParser = new WordParser(questionTemplates[i].Text);
+                questions.Add(new Question 
+                {
+                    Text = await GenerateText(questionWordParser.parsedTemplate, questionWordParser.templateDataObject),
+                    QuizId = newQuiz.Id,
+                    QuestionTypeId = questionTemplates[i].QuestionTypeId,
+                    CreateDateTime = DateTime.Now,
+                    Answers = answers,
+                });
             }
+            await _context.Question.AddRangeAsync(questions);
+            await _context.SaveChangesAsync();
             return await _context.Quiz.Include(x => x.Status).Include(x => x.Questions).FirstOrDefaultAsync(x => x.Id == newQuiz.Id);
         }
 
 
-        public int GenerateQuestion(string template, Dictionary<string, Word> templateDataObjects, Dictionary<int, WordTypeEnum> numberWordTypeData, List<Verb> verbs, List<Adjective> adjectives, List<Noun> nouns)
+        public async Task<string> GenerateText(string template, Dictionary<string, Word> templateDataObjects)
         {
-            Dictionary<int, int> relationVerbs = new Dictionary<int, int>();
-            int verbsIndex = 0;
-            Dictionary<int, int> relationAdjectives = new Dictionary<int, int>();
-            int adjectivesIndex = 0;
-            Dictionary<int, int> relationNouns = new Dictionary<int, int>();
-            int nounsIndex = 0;
-            foreach(var numberWordType in numberWordTypeData)
+            Dictionary<int, Word> numberWordTypeData = new Dictionary<int, Word>();
+            Dictionary<int, GenderEnum> nounsGender = new Dictionary<int, GenderEnum>();
+            foreach (var word in templateDataObjects)
             {
-                if(numberWordType.Value == WordTypeEnum.Adjective)
+                if (!numberWordTypeData.TryGetValue(word.Value.WordNumber, out var wordTypeEnum))
                 {
-                    relationAdjectives.Add(numberWordType.Key, adjectivesIndex);
-                    adjectivesIndex = adjectivesIndex + 1;
-                }
-                if (numberWordType.Value == WordTypeEnum.Verb)
-                {
-                    relationVerbs.Add(numberWordType.Key, verbsIndex);
-                    verbsIndex = verbsIndex + 1;
-                }
-                if (numberWordType.Value == WordTypeEnum.Noun)
-                {
-                    relationNouns.Add(numberWordType.Key, nounsIndex);
-                    nounsIndex = nounsIndex + 1;
+                    numberWordTypeData.Add(word.Value.WordNumber, word.Value);
+                    switch (word.Value.WordType)
+                    {
+                        case WordTypeEnum.Noun:
+                            nounsGender[word.Value.WordNumber] = word.Value.Gender;
+                            break;
+                    }
                 }
             }
-            foreach(var word in templateDataObjects)
+            Dictionary<int, Noun> nounsNumberObject = new Dictionary<int, Noun>();
+            Dictionary<int, Verb> verbsNumberObject = new Dictionary<int, Verb>();
+            Dictionary<int, Adjective> adjectivesNumberObject = new Dictionary<int, Adjective>();
+            foreach (var numberWord in numberWordTypeData)
             {
-                string replacedWord = "";
-                if (word.Value.WordType == WordTypeEnum.Adjective)
+                if(numberWord.Value.WordType == WordTypeEnum.Adjective)
                 {
-
+                    adjectivesNumberObject.Add(numberWord.Value.WordNumber, await _context.Adjective.FirstOrDefaultAsync(x => !adjectivesNumberObject.Select(y => y.Value.Id).Contains(x.Id)));
                 }
-                if (word.Value.WordType == WordTypeEnum.Verb)
+                if (numberWord.Value.WordType == WordTypeEnum.Verb)
                 {
-
+                    verbsNumberObject.Add(numberWord.Value.WordNumber, await _context.Verb.FirstOrDefaultAsync(x => !verbsNumberObject.Select(y => y.Value.Id).Contains(x.Id)));
                 }
-                if (word.Value.WordType == WordTypeEnum.Noun)
+                if (numberWord.Value.WordType == WordTypeEnum.Noun)
                 {
-
+                    nounsNumberObject.Add(numberWord.Value.WordNumber, await _context.Noun.FirstOrDefaultAsync(x => !nounsNumberObject.Select(y => y.Value.Id).Contains(x.Id) && x.Gender == nounsGender[numberWord.Key].ToString()));
                 }
-                //template = template.Replace($"{{{word.Key}}}", )
             }
-            return 1;
+            Dictionary<string, string> templateRealWordDataObject = new Dictionary<string, string>();
+            foreach (var templateObject in templateDataObjects)
+            {
+                string finalword = "";
+                if (nounsNumberObject.ContainsKey(templateObject.Value.WordNumber))
+                {
+                    JObject json = JObject.Parse(nounsNumberObject[templateObject.Value.WordNumber].Json);
+                    finalword = json.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Amount.ToString()))
+                        .Children().FirstOrDefault()
+                        .Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Declension.ToString()))
+                        .Children().FirstOrDefault().ToString();
+
+                }
+                else if (verbsNumberObject.ContainsKey(templateObject.Value.WordNumber))
+                {
+                    JObject json = JObject.Parse(verbsNumberObject[templateObject.Value.WordNumber].Json);
+                    var a = json.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Time.ToString()))
+                        .Children().FirstOrDefault()
+                        .Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Amount.ToString()))
+                        .Children().FirstOrDefault();
+                    if (templateObject.Value.Time == TimeEnum.Past)
+                    {
+                        if(templateObject.Value.Amount == AmountEnum.Alone)
+                        {
+                            finalword = a.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Gender.ToString()))
+                            .Children().FirstOrDefault().ToString();
+                        }
+                        else
+                        {
+                            finalword = a.ToString();
+                        }
+                    }
+                    else
+                    {
+                        finalword = a.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Person.ToString()))
+                            .Children().FirstOrDefault().ToString();
+                    }
+                }
+                else if (adjectivesNumberObject.ContainsKey(templateObject.Value.WordNumber))
+                {
+                    JObject json = JObject.Parse(adjectivesNumberObject[templateObject.Value.WordNumber].Json);
+                    finalword = json.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Gender.ToString()))
+                        .Children().FirstOrDefault()
+                        .Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Amount.ToString()))
+                        .Children().FirstOrDefault()
+                        .Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Declension.ToString()))
+                        .Children().FirstOrDefault().ToString();
+                    
+                }
+                templateRealWordDataObject.Add(templateObject.Key, finalword);
+            }
+            var templateText = Scriban.Template.Parse(template);
+            return templateText.Render(templateRealWordDataObject);
         }
 
         public async Task<List<Quiz>> GetEmployeeQuizzes(int empId, int userId)

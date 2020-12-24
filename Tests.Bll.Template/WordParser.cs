@@ -9,8 +9,8 @@ namespace Tests.Bll.Template
     {
         private readonly string _template;
         private List<Word> _words;
-        public string _parsedTemplate;
-        public Dictionary<string, Word> _templateDataObject;
+        public string parsedTemplate;
+        public Dictionary<string, Word> templateDataObject;
 
         public WordParser(string template)
         {
@@ -102,8 +102,8 @@ namespace Tests.Bll.Template
                 
                 _words.Add(word);
             }
-            _parsedTemplate = doc.DocumentNode.InnerHtml;
-            _templateDataObject = GetTemplateDataObject();
+            parsedTemplate = doc.DocumentNode.InnerHtml;
+            templateDataObject = GetTemplateDataObject();
         }
 
         public Dictionary<string, Word> GetTemplateDataObject()

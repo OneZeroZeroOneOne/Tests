@@ -14,7 +14,7 @@
 
     public enum GenderEnum
     {
-        Neuther,Man,Woman
+        Neuther,Male,Female
     }
 
     public enum AmountEnum

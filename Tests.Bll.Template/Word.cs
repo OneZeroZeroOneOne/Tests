@@ -27,14 +27,14 @@ namespace Tests.Bll.Template
             if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
                 return false;
 
-            return x.Id == y.Id;
+            return x.WordNumber == y.WordNumber;
         }
 
         public override int GetHashCode(Word? obj)
         {
             if (object.ReferenceEquals(obj, null)) return 0;
 
-            return obj.Id == null ? 0 : obj.Id.GetHashCode();
+            return obj.WordNumber == null ? 0 : obj.WordNumber.GetHashCode();
         }
     }
 }
