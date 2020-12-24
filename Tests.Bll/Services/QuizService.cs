@@ -63,6 +63,7 @@ namespace Tests.Bll.Services
             {
                 Question question = await GenerateQuestion(questionTemplates[i]);
                 question.QuestionTypeId = questionTemplates[i].QuestionTypeId;
+                question.QuizId = newQuiz.Id;
                 questions.Add(question);
             }
             await _context.Question.AddRangeAsync(questions);
