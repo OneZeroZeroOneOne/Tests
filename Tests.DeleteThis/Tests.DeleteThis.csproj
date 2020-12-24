@@ -1,17 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Tests.Bll.Template\Tests.Bll.Template.csproj" />
-    <ProjectReference Include="..\Tests.Dal\Tests.Dal.csproj" />
-    <ProjectReference Include="..\Tests.Utilities\Tests.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

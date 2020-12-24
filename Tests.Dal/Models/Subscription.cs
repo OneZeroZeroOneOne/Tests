@@ -9,6 +9,7 @@ namespace Tests.Dal.Models
     {
         public Subscription()
         {
+            OrderSubscriptions = new HashSet<OrderSubscription>();
             SubscriptionDiscounts = new HashSet<SubscriptionDiscount>();
         }
 
@@ -21,6 +22,7 @@ namespace Tests.Dal.Models
 
         public virtual SubscriptionType Type { get; set; }
         public virtual User User { get; set; }
+        public virtual ICollection<OrderSubscription> OrderSubscriptions { get; set; }
         public virtual ICollection<SubscriptionDiscount> SubscriptionDiscounts { get; set; }
     }
 }

@@ -33,7 +33,7 @@ namespace Tests.Authorization.WebApi
 
             MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING") ?? "Host=104.248.250.163;Database=postgres;Username=postgres;Password=123456asdfg");
 
-            var jwtOption = context.JwtOptions.FirstOrDefault();
+            JwtOption jwtOption = context.JwtOption.FirstOrDefault();
 
             AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
 

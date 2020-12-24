@@ -46,7 +46,7 @@ namespace Tests.Payment.WebApi
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
 
-            var jwtOption = context.JwtOptions.FirstOrDefault();
+            JwtOption jwtOption = context.JwtOption.FirstOrDefault();
 
             if (jwtOption == null) throw new ApplicationException("Can't configure authorize jwt options");
 

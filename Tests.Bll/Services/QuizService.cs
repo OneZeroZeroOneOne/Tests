@@ -1,8 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using Tests.Bll.Template;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
 using Tests.Utilities.Exceptions;
@@ -51,7 +56,124 @@ namespace Tests.Bll.Services
                 EmployeeId = empId,
             });
             await _context.SaveChangesAsync();
-            return await _context.Quiz.Include(x => x.Status).FirstOrDefaultAsync(x => x.Id == newQuiz.Id);
+            List<QuestionTemplate> questionTemplates = await _context.QuestionTemplate.Include(x => x.AnswerTamplates).Take(20).ToListAsync();
+            List<Question> questions = new List<Question>();
+            for (int i = 0; i < questionTemplates.Count; i++)
+            {
+                List<Answer> answers = new List<Answer>();
+                foreach (var answerTamplate in questionTemplates[i].AnswerTamplates)
+                {
+                    WordParser answerWordParser = new WordParser(answerTamplate.Text);
+                    answers.Add(new Answer
+                    {
+                        Text = await GenerateText(answerWordParser.parsedTemplate, answerWordParser.templateDataObject),
+                        CreateDateTime = DateTime.Now,
+                    });
+                }
+                WordParser questionWordParser = new WordParser(questionTemplates[i].Text);
+                questions.Add(new Question 
+                {
+                    Text = await GenerateText(questionWordParser.parsedTemplate, questionWordParser.templateDataObject),
+                    QuizId = newQuiz.Id,
+                    QuestionTypeId = questionTemplates[i].QuestionTypeId,
+                    CreateDateTime = DateTime.Now,
+                    Answers = answers,
+                });
+            }
+            await _context.Question.AddRangeAsync(questions);
+            await _context.SaveChangesAsync();
+            return await _context.Quiz.Include(x => x.Status).Include(x => x.Questions).FirstOrDefaultAsync(x => x.Id == newQuiz.Id);
+        }
+
+
+        public async Task<string> GenerateText(string template, Dictionary<string, Word> templateDataObjects)
+        {
+            Dictionary<int, Word> numberWordTypeData = new Dictionary<int, Word>();
+            Dictionary<int, GenderEnum> nounsGender = new Dictionary<int, GenderEnum>();
+            foreach (var word in templateDataObjects)
+            {
+                if (!numberWordTypeData.TryGetValue(word.Value.WordNumber, out var wordTypeEnum))
+                {
+                    numberWordTypeData.Add(word.Value.WordNumber, word.Value);
+                    switch (word.Value.WordType)
+                    {
+                        case WordTypeEnum.Noun:
+                            nounsGender[word.Value.WordNumber] = word.Value.Gender;
+                            break;
+                    }
+                }
+            }
+            Dictionary<int, Noun> nounsNumberObject = new Dictionary<int, Noun>();
+            Dictionary<int, Verb> verbsNumberObject = new Dictionary<int, Verb>();
+            Dictionary<int, Adjective> adjectivesNumberObject = new Dictionary<int, Adjective>();
+            foreach (var numberWord in numberWordTypeData)
+            {
+                if(numberWord.Value.WordType == WordTypeEnum.Adjective)
+                {
+                    adjectivesNumberObject.Add(numberWord.Value.WordNumber, await _context.Adjective.FirstOrDefaultAsync(x => !adjectivesNumberObject.Select(y => y.Value.Id).Contains(x.Id)));
+                }
+                if (numberWord.Value.WordType == WordTypeEnum.Verb)
+                {
+                    verbsNumberObject.Add(numberWord.Value.WordNumber, await _context.Verb.FirstOrDefaultAsync(x => !verbsNumberObject.Select(y => y.Value.Id).Contains(x.Id)));
+                }
+                if (numberWord.Value.WordType == WordTypeEnum.Noun)
+                {
+                    nounsNumberObject.Add(numberWord.Value.WordNumber, await _context.Noun.FirstOrDefaultAsync(x => !nounsNumberObject.Select(y => y.Value.Id).Contains(x.Id) && x.Gender == nounsGender[numberWord.Key].ToString()));
+                }
+            }
+            Dictionary<string, string> templateRealWordDataObject = new Dictionary<string, string>();
+            foreach (var templateObject in templateDataObjects)
+            {
+                string finalword = "";
+                if (nounsNumberObject.ContainsKey(templateObject.Value.WordNumber))
+                {
+                    JObject json = JObject.Parse(nounsNumberObject[templateObject.Value.WordNumber].Json);
+                    finalword = json.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Amount.ToString()))
+                        .Children().FirstOrDefault()
+                        .Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Declension.ToString()))
+                        .Children().FirstOrDefault().ToString();
+
+                }
+                else if (verbsNumberObject.ContainsKey(templateObject.Value.WordNumber))
+                {
+                    JObject json = JObject.Parse(verbsNumberObject[templateObject.Value.WordNumber].Json);
+                    var a = json.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Time.ToString()))
+                        .Children().FirstOrDefault()
+                        .Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Amount.ToString()))
+                        .Children().FirstOrDefault();
+                    if (templateObject.Value.Time == TimeEnum.Past)
+                    {
+                        if(templateObject.Value.Amount == AmountEnum.Alone)
+                        {
+                            finalword = a.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Gender.ToString()))
+                            .Children().FirstOrDefault().ToString();
+                        }
+                        else
+                        {
+                            finalword = a.ToString();
+                        }
+                    }
+                    else
+                    {
+                        finalword = a.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Person.ToString()))
+                            .Children().FirstOrDefault().ToString();
+                    }
+                }
+                else if (adjectivesNumberObject.ContainsKey(templateObject.Value.WordNumber))
+                {
+                    JObject json = JObject.Parse(adjectivesNumberObject[templateObject.Value.WordNumber].Json);
+                    finalword = json.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Gender.ToString()))
+                        .Children().FirstOrDefault()
+                        .Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Amount.ToString()))
+                        .Children().FirstOrDefault()
+                        .Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Declension.ToString()))
+                        .Children().FirstOrDefault().ToString();
+                    
+                }
+                templateRealWordDataObject.Add(templateObject.Key, finalword);
+            }
+            var templateText = Scriban.Template.Parse(template);
+            return templateText.Render(templateRealWordDataObject);
         }
 
         public async Task<List<Quiz>> GetEmployeeQuizzes(int empId, int userId)
