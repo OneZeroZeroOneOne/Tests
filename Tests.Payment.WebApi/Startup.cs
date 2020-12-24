@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tests.Bll.DescribeDependency;
 using Tests.Bll.Services;
 using Tests.Dal;
 using Tests.Dal.Contexts;
@@ -61,6 +62,8 @@ namespace Tests.Payment.WebApi
                         policy.Requirements.Add(new RoleEntryRequirement(t.Id)));
                 });
             }
+
+            services.AddNotificationSender();
 
             services.AddSingleton<IAuthorizationHandler, RoleEntryHandler>();
 

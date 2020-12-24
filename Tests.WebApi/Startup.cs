@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Tests.Bll.DescribeDependency;
 using Tests.Bll.Services;
 using Tests.Dal;
 using Tests.Dal.Contexts;
@@ -20,7 +21,6 @@ using Tests.Dal.Models;
 using Tests.Security.Authorization;
 using Tests.Security.Options;
 using Tests.Utilities.Middlewares;
-using Tests.WebApi.Controllers;
 
 namespace Tests.WebApi
 {
@@ -40,6 +40,8 @@ namespace Tests.WebApi
             MainContext context = new MainContext("Host=104.248.250.163;Database=postgres;Username=postgres;Password=123456asdfg");
 
             services.AddScoped(x => new MainContext("Host=104.248.250.163;Database=postgres;Username=postgres;Password=123456asdfg"));
+
+            services.AddNotificationSender();
 
             var mapperConfig = new MapperConfiguration(mc =>
             {

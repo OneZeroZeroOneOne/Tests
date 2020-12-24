@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tests.Bll.DescribeDependency;
 using Tests.Bll.Services;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
@@ -36,6 +37,8 @@ namespace Tests.Authorization.WebApi
             JwtOption jwtOption = context.JwtOption.FirstOrDefault();
 
             AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
+
+            services.AddNotificationSender();
 
             services.AddTransient<RegisterService>();
 
