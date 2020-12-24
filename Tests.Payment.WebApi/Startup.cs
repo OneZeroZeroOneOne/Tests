@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Tests.Bll.DescribeDependency;
 using Tests.Bll.Services;
 using Tests.Dal;
@@ -47,7 +48,9 @@ namespace Tests.Payment.WebApi
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
 
-            JwtOption jwtOption = context.JwtOption.FirstOrDefault();
+            JwtOption jwtOption =
+                JsonConvert.DeserializeObject<JwtOption>(context.GlobalSetting
+                    .FirstOrDefault(x => x.Key == "JwtOption")?.StringValue ?? throw new Exception("Can't find JwtOption setting"));
 
             if (jwtOption == null) throw new ApplicationException("Can't configure authorize jwt options");
 
