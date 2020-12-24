@@ -19,7 +19,7 @@ namespace Tests.Bll.Services
 
         public async Task AddDefaultNotificationSetting(int userId)
         {
-            await _mainContext.UserNotificationSettings.AddRangeAsync(new List<UserNotificationSetting>()
+            await _mainContext.UserNotificationSetting.AddRangeAsync(new List<UserNotificationSetting>()
             {
                 new UserNotificationSetting
                 {
@@ -78,7 +78,7 @@ namespace Tests.Bll.Services
 
         public async Task<List<UserNotificationSetting>> GetUserNotificationSettings(int userId)
         {
-            return await _mainContext.UserNotificationSettings.Include(x => x.NotificationType)
+            return await _mainContext.UserNotificationSetting.Include(x => x.NotificationType)
                 .Where(x => x.UserId == userId).ToListAsync();
         }
     }
