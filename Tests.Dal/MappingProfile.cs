@@ -11,6 +11,8 @@ namespace Tests.Dal
     {
         public MappingProfile()
         {
+            CreateMap<Notification, OutNotificationViewModel>();
+
             CreateMap<Status, OutStatusViewModel>();
             CreateMap<Quiz, OutQuizViewModel>().ForMember(x => x.Status, x => x.MapFrom(y => y.Status));
             

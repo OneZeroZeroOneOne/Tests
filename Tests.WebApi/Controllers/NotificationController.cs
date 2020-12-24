@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Tests.Bll.Services;
@@ -14,21 +17,23 @@ namespace Tests.WebApi.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly NotificationService _notificationService;
+        private readonly IMapper _mapper;
 
-        public NotificationController(NotificationService notificationService)
+        public NotificationController(NotificationService notificationService, IMapper mapper)
         {
             _notificationService = notificationService;
+            _mapper = mapper;
         }
 
 
-        [HttpGet]
+        [HttpGet("Settings")]
         [Authorize(Policy = "ClientAdmin")]
-        public async Task<OutNotificationViewModel> GetUserNotificationSettings()
+        public async Task<OutNotificationSettingAllViewModel> GetUserNotificationSettings()
         {
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
             var settings = await _notificationService.GetUserNotificationSettings(authorizedUserModel.Id);
 
-            return new OutNotificationViewModel
+            return new OutNotificationSettingAllViewModel
             {
                 Email = settings.Where(x => x.NotificationTargetTypeId == (int)NotificationTargetTypeEnum.Email).Select(x => new OutNotificationSettingViewModel
                 {
@@ -47,6 +52,26 @@ namespace Tests.WebApi.Controllers
                     TargetTypeName = NotificationTargetTypeEnum.Web.ToString(),
                 }).ToList(),
             };
+        }
+
+        [HttpGet("{targetTypeId}")]
+        [Authorize(Policy = "ClientAdmin")]
+        public async Task<List<OutNotificationViewModel>> GetUserNotifications([FromRoute]int targetTypeId, [FromQuery] bool? isSeen = null)
+        {
+            AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
+            var notifications = await _notificationService.GetUserNotification(authorizedUserModel.Id, targetTypeId, isSeen);
+
+            return _mapper.Map<List<OutNotificationViewModel>>(notifications);
+        }
+
+        [HttpPost("{notificationId}")]
+        [Authorize(Policy = "ClientAdmin")]
+        public async Task<OutNotificationViewModel> MarkAsSeen([FromRoute] Guid notificationId)
+        {
+            AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
+            var notification = await _notificationService.MarkAsSeen(authorizedUserModel.Id, notificationId);
+
+            return _mapper.Map<OutNotificationViewModel>(notification);
         }
     }
 }

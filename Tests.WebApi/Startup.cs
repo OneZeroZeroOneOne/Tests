@@ -37,9 +37,9 @@ namespace Tests.WebApi
         {
             services.AddControllers();
 
-            MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING"));
+            MainContext context = new MainContext("Host=104.248.250.163;Database=postgres;Username=postgres;Password=123456asdfg");
 
-            services.AddScoped(x => new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING")));
+            services.AddScoped(x => new MainContext("Host=104.248.250.163;Database=postgres;Username=postgres;Password=123456asdfg"));
 
             var mapperConfig = new MapperConfiguration(mc =>
             {

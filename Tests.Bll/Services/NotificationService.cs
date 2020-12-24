@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -80,6 +81,30 @@ namespace Tests.Bll.Services
         {
             return await _mainContext.UserNotificationSetting.Include(x => x.NotificationType)
                 .Where(x => x.UserId == userId).ToListAsync();
+        }
+
+        public async Task<List<Notification>> GetUserNotification(int userId, int targetTypeId, bool? isSeen)
+        {
+            var notificationQuery = _mainContext.Notification
+                .Where(x => x.NotificationTargetTypeId == targetTypeId && x.UserId == userId);
+
+            if (isSeen != null)
+                notificationQuery = notificationQuery.Where(x => x.IsSeen == isSeen);
+
+            return await notificationQuery.OrderByDescending(x => x.CreatedDateTime).ToListAsync();
+        }
+
+        public async Task<Notification> MarkAsSeen(int id, Guid notificationId)
+        {
+            var notification = await 
+                _mainContext.Notification.FirstOrDefaultAsync(x =>
+                    x.NotificationId == notificationId && x.UserId == id);
+
+            if (notification != null)
+                notification.IsSeen = true;
+
+            await _mainContext.SaveChangesAsync();
+            return notification;
         }
     }
 }
