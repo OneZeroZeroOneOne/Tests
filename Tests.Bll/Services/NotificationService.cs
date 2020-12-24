@@ -84,7 +84,7 @@ namespace Tests.Bll.Services
                 .Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task<IEnumerable<OutNotificationViewModel>> GetUserNotification(int userId, int targetTypeId, bool? isSeen)
+        public IQueryable<OutNotificationViewModel> GetUserNotification(int userId, int targetTypeId, bool? isSeen)
         {
             var notificationQuery = (
                 from notification in _mainContext.Notification
@@ -103,7 +103,7 @@ namespace Tests.Bll.Services
             if (isSeen != null)
                 notificationQuery = notificationQuery.Where(x => x.Notification.IsSeen == isSeen);
 
-            return (await notificationQuery.OrderByDescending(x => x.Notification.CreatedDateTime).ToListAsync())
+            return notificationQuery.OrderByDescending(x => x.Notification.CreatedDateTime)
                 .Select(x => new OutNotificationViewModel
                 {
                     ArchivedDateTime = x.Notification.ArchivedDateTime,
@@ -135,7 +135,7 @@ namespace Tests.Bll.Services
                 });
         }
 
-        public async Task<Notification> MarkAsSeen(int id, Guid notificationId)
+        public async Task<OutNotificationViewModel> MarkAsSeen(int id, Guid notificationId)
         {
             var notification = await 
                 _mainContext.Notification.FirstOrDefaultAsync(x =>
@@ -145,7 +145,7 @@ namespace Tests.Bll.Services
                 notification.IsSeen = true;
 
             await _mainContext.SaveChangesAsync();
-            return notification;
+            return await GetUserNotification(id, notification.NotificationTargetTypeId, null).FirstOrDefaultAsync(x => x.NotificationId == notificationId);
         }
     }
 }

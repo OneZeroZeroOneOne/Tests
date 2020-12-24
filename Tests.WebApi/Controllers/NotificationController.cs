@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,9 +60,9 @@ namespace Tests.WebApi.Controllers
         public async Task<List<OutNotificationViewModel>> GetUserNotifications([FromRoute]int targetTypeId, [FromQuery] bool? isSeen = null)
         {
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
-            var notifications = await _notificationService.GetUserNotification(authorizedUserModel.Id, targetTypeId, isSeen);
+            var notifications = _notificationService.GetUserNotification(authorizedUserModel.Id, targetTypeId, isSeen);
 
-            return notifications.ToList();
+            return await notifications.ToListAsync();
         }
 
         [HttpPost("{notificationId}")]
@@ -69,9 +70,8 @@ namespace Tests.WebApi.Controllers
         public async Task<OutNotificationViewModel> MarkAsSeen([FromRoute] Guid notificationId)
         {
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
-            var notification = await _notificationService.MarkAsSeen(authorizedUserModel.Id, notificationId);
 
-            return _mapper.Map<OutNotificationViewModel>(notification);
+            return await _notificationService.MarkAsSeen(authorizedUserModel.Id, notificationId);
         }
     }
 }
