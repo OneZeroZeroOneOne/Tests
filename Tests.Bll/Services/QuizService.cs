@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Tests.Bll.Template;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
+using Tests.Utilities;
 using Tests.Utilities.Exceptions;
 
 namespace Tests.Bll.Services
@@ -60,37 +61,21 @@ namespace Tests.Bll.Services
             List<Question> questions = new List<Question>();
             for (int i = 0; i < questionTemplates.Count; i++)
             {
-                List<Answer> answers = new List<Answer>();
-                foreach (var answerTamplate in questionTemplates[i].AnswerTamplates)
-                {
-                    WordParser answerWordParser = new WordParser(answerTamplate.Text);
-                    answers.Add(new Answer
-                    {
-                        Text = await GenerateText(answerWordParser.parsedTemplate, answerWordParser.templateDataObject),
-                        CreateDateTime = DateTime.Now,
-                    });
-                }
-                WordParser questionWordParser = new WordParser(questionTemplates[i].Text);
-                questions.Add(new Question 
-                {
-                    Text = await GenerateText(questionWordParser.parsedTemplate, questionWordParser.templateDataObject),
-                    QuizId = newQuiz.Id,
-                    QuestionTypeId = questionTemplates[i].QuestionTypeId,
-                    CreateDateTime = DateTime.Now,
-                    Answers = answers,
-                });
+                Question question = await GenerateQuestion(questionTemplates[i]);
+                question.QuestionTypeId = questionTemplates[i].QuestionTypeId;
+                questions.Add(question);
             }
             await _context.Question.AddRangeAsync(questions);
             await _context.SaveChangesAsync();
             return await _context.Quiz.Include(x => x.Status).Include(x => x.Questions).FirstOrDefaultAsync(x => x.Id == newQuiz.Id);
         }
 
-
-        public async Task<string> GenerateText(string template, Dictionary<string, Word> templateDataObjects)
+        public async Task<Question> GenerateQuestion(QuestionTemplate questionTemplate)
         {
+            WordParser wordParser = new WordParser(questionTemplate.Text);
             Dictionary<int, Word> numberWordTypeData = new Dictionary<int, Word>();
             Dictionary<int, GenderEnum> nounsGender = new Dictionary<int, GenderEnum>();
-            foreach (var word in templateDataObjects)
+            foreach (var word in wordParser.templateDataObjects)
             {
                 if (!numberWordTypeData.TryGetValue(word.Value.WordNumber, out var wordTypeEnum))
                 {
@@ -108,7 +93,7 @@ namespace Tests.Bll.Services
             Dictionary<int, Adjective> adjectivesNumberObject = new Dictionary<int, Adjective>();
             foreach (var numberWord in numberWordTypeData)
             {
-                if(numberWord.Value.WordType == WordTypeEnum.Adjective)
+                if (numberWord.Value.WordType == WordTypeEnum.Adjective)
                 {
                     adjectivesNumberObject.Add(numberWord.Value.WordNumber, await _context.Adjective.FirstOrDefaultAsync(x => !adjectivesNumberObject.Select(y => y.Value.Id).Contains(x.Id)));
                 }
@@ -121,6 +106,37 @@ namespace Tests.Bll.Services
                     nounsNumberObject.Add(numberWord.Value.WordNumber, await _context.Noun.FirstOrDefaultAsync(x => !nounsNumberObject.Select(y => y.Value.Id).Contains(x.Id) && x.Gender == nounsGender[numberWord.Key].ToString()));
                 }
             }
+            Dictionary<string, string> templateRealWordDataObject = new Dictionary<string, string>();
+            List<Answer> answers = new List<Answer>();
+            foreach (var answerTemplete in questionTemplate.AnswerTamplates)
+            {
+                WordParser answerWordParser = new WordParser(answerTemplete.Text);
+                templateRealWordDataObject = CreateTempleteWordDict(answerWordParser.templateDataObjects,
+                    nounsNumberObject, verbsNumberObject, adjectivesNumberObject);
+                var scribanAnswerTemplate = Scriban.Template.Parse(answerWordParser.parsedTemplate);
+                answers.Add(new Answer
+                {
+                    Text = string.Join(". ", scribanAnswerTemplate.Render(templateRealWordDataObject).Split(". ").Select(x => x.FirstCharToUpper())),
+                    CreateDateTime = DateTime.Now,
+                });
+            }
+
+            templateRealWordDataObject = CreateTempleteWordDict(wordParser.templateDataObjects, nounsNumberObject, verbsNumberObject, adjectivesNumberObject);
+            var scribanQuestionTemplate = Scriban.Template.Parse(wordParser.parsedTemplate);
+            Question question = new Question
+            {
+                QuestionTypeId = questionTemplate.QuestionTypeId,
+                CreateDateTime = DateTime.Now,
+                Text = string.Join(". ", scribanQuestionTemplate.Render(templateRealWordDataObject).Split(". ").Select(x => x.FirstCharToUpper())),
+                Answers = answers,
+            };
+            return question;
+
+        }
+
+        public Dictionary<string, string> CreateTempleteWordDict(Dictionary<string, Word> templateDataObjects,
+            Dictionary<int, Noun> nounsNumberObject, Dictionary<int, Verb> verbsNumberObject, Dictionary<int, Adjective> adjectivesNumberObject)
+        {
             Dictionary<string, string> templateRealWordDataObject = new Dictionary<string, string>();
             foreach (var templateObject in templateDataObjects)
             {
@@ -143,7 +159,7 @@ namespace Tests.Bll.Services
                         .Children().FirstOrDefault();
                     if (templateObject.Value.Time == TimeEnum.Past)
                     {
-                        if(templateObject.Value.Amount == AmountEnum.Alone)
+                        if (templateObject.Value.Amount == AmountEnum.Alone)
                         {
                             finalword = a.Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Gender.ToString()))
                             .Children().FirstOrDefault().ToString();
@@ -168,13 +184,16 @@ namespace Tests.Bll.Services
                         .Children().FirstOrDefault()
                         .Children().FirstOrDefault(x => x.Path.Contains(templateObject.Value.Declension.ToString()))
                         .Children().FirstOrDefault().ToString();
-                    
+
                 }
                 templateRealWordDataObject.Add(templateObject.Key, finalword);
             }
-            var templateText = Scriban.Template.Parse(template);
-            return templateText.Render(templateRealWordDataObject);
+            return templateRealWordDataObject;
+
         }
+
+
+
 
         public async Task<List<Quiz>> GetEmployeeQuizzes(int empId, int userId)
         {
