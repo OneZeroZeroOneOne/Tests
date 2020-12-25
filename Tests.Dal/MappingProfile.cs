@@ -15,7 +15,9 @@ namespace Tests.Dal
 
             CreateMap<Status, OutStatusViewModel>();
             CreateMap<Quiz, OutQuizViewModel>().ForMember(x => x.Status, x => x.MapFrom(y => y.Status));
-            
+            CreateMap<Question, OutQuestionViewModel>().ForMember(x => x.Answers, x => x.MapFrom(y => y.Answers));
+            CreateMap<Answer, OutAnswerViewModel>();
+
             CreateMap<InEmployeeViewModel, Employee>();
             CreateMap<InVacancyViewModel, Vacancy>();
             CreateMap<InPositionViewModel, Position>();
@@ -26,7 +28,7 @@ namespace Tests.Dal
             CreateMap<Vacancy, OutVacancyViewModel>();
 
             CreateMap<Employee, OutEmployeeViewModel>().ForMember(x => x.Quizzes,
-                x => x.MapFrom(y => y.UserQuizzes.ToList().Select(t => t.Quiz)))
+                x => x.MapFrom(y => y.Quizzes))
                 .ForMember(x => x.Vacancy, x => x.MapFrom(y => y.Vacancy))
                 .ForMember(x => x.Resume, x => x.MapFrom(y => y.Resume))
                 .ForMember(x => x.Resume, x => x.MapFrom(y => y.Resume));

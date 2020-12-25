@@ -13,9 +13,10 @@ namespace Tests.Dal.Models
         }
 
         public int Id { get; set; }
-        public int? QuestionId { get; set; }
+        public int QuestionId { get; set; }
         public string Text { get; set; }
-        public DateTime? CreateDateTime { get; set; }
+        public DateTime CreateDateTime { get; set; }
+        public bool? IsRight { get; set; }
 
         public virtual Question Question { get; set; }
         public virtual ICollection<UserAnswer> UserAnswers { get; set; }

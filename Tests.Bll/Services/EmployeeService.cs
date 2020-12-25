@@ -25,9 +25,8 @@ namespace Tests.Bll.Services
             UserEmployee userEmployee = await _context.UserEmployee.FirstOrDefaultAsync(x => x.EmployeeId == empId && x.UserId == userId);
             if (userEmployee != null)
             {
-                return await _context.Employee.Include(x => x.UserQuizzes).ThenInclude(x => x.Quiz)
-                    .ThenInclude(x => x.Status).Include(x => x.UserQuizzes).ThenInclude(x => x.Quiz)
-                    .ThenInclude(x => x.Questions).ThenInclude(x => x.UserAnswers)
+                return await _context.Employee.Include(x => x.Quizzes)
+                    .ThenInclude(x => x.Status)
                     .Include(x => x.Avatar)
                     .Include(x => x.Resume)
                     .Include(x => x.Vacancy)
@@ -41,7 +40,7 @@ namespace Tests.Bll.Services
             var userEmployees = _context.UserEmployee
                 .Where(x => x.UserId == userId)
                 .Include(x => x.Employee)
-                .ThenInclude(x => x.UserQuizzes).ThenInclude(x => x.Quiz).ThenInclude(x => x.Status)
+                .ThenInclude(x => x.Quizzes).ThenInclude(x => x.Status)
                 .Include(x => x.Employee.Avatar)
                 .Include(x => x.Employee.Resume)
                 .Include(x => x.Employee.Vacancy)
@@ -49,7 +48,7 @@ namespace Tests.Bll.Services
                 .Select(x => x.Employee);
 
             if (quizStatusId != null)
-                userEmployees = userEmployees.Where(x => x.UserQuizzes.Any() && x.UserQuizzes.OrderByDescending(xx => xx.Id).FirstOrDefault().Quiz.StatusId == quizStatusId);
+                userEmployees = userEmployees.Where(x => x.Quizzes.Any() && x.Quizzes.OrderByDescending(xx => xx.Id).FirstOrDefault().StatusId == quizStatusId);
 
             if (isCandidate != null)
                 userEmployees = userEmployees.Where(x => x.IsCandidate == isCandidate);

@@ -23,6 +23,19 @@ namespace Tests.Bll.Services
             _context = context;
         }
 
+        public async Task<Quiz> GetQuizByAddressKey(string addressKey)
+        {
+            return await _context.Quiz.Include(x => x.Questions).ThenInclude(x => x.Answers).Include(x => x.Status).FirstOrDefaultAsync(x => x.AddressKey == addressKey);
+        }
+
+
+        public async void SetQuizStarted(string addressKey)
+        {
+            Quiz q = await _context.Quiz.Include(x => x.Questions).ThenInclude(x => x.Answers).FirstOrDefaultAsync(x => x.AddressKey == addressKey);
+            q.StatusId = 2;
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<Quiz> CreateNewQuiz(int empId, int userId)
         {
             UserEmployee userEmployee = await _context.UserEmployee.FirstOrDefaultAsync(x => x.EmployeeId == empId && x.UserId == userId);
@@ -36,8 +49,7 @@ namespace Tests.Bll.Services
             if (subscription == null)
                 throw ExceptionFactory.SoftException(ExceptionEnum.SubscriptionNotFound, "Subscription not found");
 
-            int quizzesFromThisSubscriptionCount = await _context.UserQuiz.Include(x => x.Quiz)
-                .Where(x => x.UserId == userId).Select(x => x.Quiz).Where(x =>
+            int quizzesFromThisSubscriptionCount = await _context.Quiz.Where(x => x.UserId == userId &&
                     x.CreateDateTime >= subscription.BeginDateTime && x.CreateDateTime <= subscription.EndDateTime)
                 .CountAsync();
 
@@ -47,15 +59,8 @@ namespace Tests.Bll.Services
 
             string quizId = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10);
 
-            Quiz newQuiz = new Quiz {StatusId = 1, CreateDateTime = currentTime, AddressKey = quizId };
+            Quiz newQuiz = new Quiz {StatusId = 1, CreateDateTime = currentTime, AddressKey = quizId, EmployeeId = empId, UserId = userId };
             await _context.Quiz.AddAsync(newQuiz);
-            await _context.SaveChangesAsync();
-            await _context.UserQuiz.AddAsync(new UserQuiz
-            {
-                QuizId = newQuiz.Id,
-                UserId = userId,
-                EmployeeId = empId,
-            });
             await _context.SaveChangesAsync();
             List<QuestionTemplate> questionTemplates = await _context.QuestionTemplate.Include(x => x.AnswerTamplates).Take(20).ToListAsync();
             List<Question> questions = new List<Question>();
@@ -193,12 +198,9 @@ namespace Tests.Bll.Services
 
         }
 
-
-
-
         public async Task<List<Quiz>> GetEmployeeQuizzes(int empId, int userId)
         {
-            return await _context.UserQuiz.Include(x => x.Quiz).ThenInclude(x => x.Status).Where(x => x.UserId == userId && x.EmployeeId == empId).Select(x => x.Quiz).ToListAsync();
+            return await _context.Quiz.Include(x => x.Status).Where(x => x.UserId == userId && x.EmployeeId == empId).ToListAsync();
         }
     }
 }

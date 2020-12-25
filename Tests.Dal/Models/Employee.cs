@@ -9,9 +9,9 @@ namespace Tests.Dal.Models
     {
         public Employee()
         {
+            Quizzes = new HashSet<Quiz>();
             UserAnswers = new HashSet<UserAnswer>();
             UserEmployees = new HashSet<UserEmployee>();
-            UserQuizzes = new HashSet<UserQuiz>();
         }
 
         public int Id { get; set; }
@@ -34,8 +34,8 @@ namespace Tests.Dal.Models
         public virtual Position Position { get; set; }
         public virtual Resume Resume { get; set; }
         public virtual Vacancy Vacancy { get; set; }
+        public virtual ICollection<Quiz> Quizzes { get; set; }
         public virtual ICollection<UserAnswer> UserAnswers { get; set; }
         public virtual ICollection<UserEmployee> UserEmployees { get; set; }
-        public virtual ICollection<UserQuiz> UserQuizzes { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace Tests.Dal.Models
 
         public int Id { get; set; }
         public string Text { get; set; }
-        public int? QuestionTypeId { get; set; }
+        public int QuestionTypeId { get; set; }
 
         public virtual QuestionType QuestionType { get; set; }
         public virtual ICollection<AnswerTamplate> AnswerTamplates { get; set; }

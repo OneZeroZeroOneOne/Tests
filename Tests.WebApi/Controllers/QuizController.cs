@@ -41,7 +41,5 @@ namespace Tests.WebApi.Controllers
             List<Quiz> quizzes = await _quizService.GetEmployeeQuizzes(id, authorizedUserModel.Id);
             return _mapperProfile.Map<List<OutQuizViewModel>>(quizzes);
         }
-
-
     }
 }

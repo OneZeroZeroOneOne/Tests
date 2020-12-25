@@ -1,21 +1,26 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tests.Bll.DescribeDependency;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Tests.Bll.Services;
+using Tests.Dal;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
+using Tests.Security.Authorization;
 using Tests.Security.Options;
 using Tests.Utilities.Middlewares;
 
-namespace Tests.Authorization.WebApi
+namespace Tests.QuestionAnswer.WebApi
 {
     public class Startup
     {
@@ -29,7 +34,6 @@ namespace Tests.Authorization.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
 
             MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING"));
@@ -38,17 +42,17 @@ namespace Tests.Authorization.WebApi
 
             AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
 
-            services.AddNotificationSender();
-
-            services.AddTransient<RegisterService>();
-
             services.AddScoped(x => new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING")));
 
-            services.AddTransient<LoginService>();
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
 
-            services.AddTransient<UserService>();
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
 
-            services.AddTransient<NotificationService>();
+            services.AddTransient<QuizService>();
 
             services.AddSwaggerGen(c =>
             {
@@ -94,25 +98,19 @@ namespace Tests.Authorization.WebApi
 
             app.ConfigureCustomExceptionMiddleware();
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
 
             app.UseCors(x => x.AllowAnyOrigin());
             app.UseCors(x => x.AllowAnyHeader());
-
-            app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-
-            var options = new ForwardedHeadersOptions
+            app.UseEndpoints(endpoints =>
             {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            };
-
-            app.UseForwardedHeaders(options);
+                endpoints.MapControllers();
+            });
 
             if (env.IsDevelopment())
             {
@@ -120,7 +118,7 @@ namespace Tests.Authorization.WebApi
             }
             else
             {
-                var basePath = "/api/authorization";
+                var basePath = "/api/questionanswer";
                 app.UseSwagger(c => c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
                 {
                     swaggerDoc.Servers = new List<OpenApiServer>

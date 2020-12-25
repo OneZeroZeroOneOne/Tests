@@ -33,7 +33,6 @@ namespace Tests.Authorization.WebApi.Controllers
             if (!headers.ContainsKey("authorization"))
                 throw ExceptionFactory.FriendlyException(ExceptionEnum.AuthorizationHeaderNotExist,
                     "Authorization header not exist");
-
             headers.TryGetValue("authorization", out var token);
             var jwtToken = JwtService.ParseToken(token.ToString().Split(" ").Last(), AuthOption.KEY);
             var userId = int.Parse(jwtToken.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value);

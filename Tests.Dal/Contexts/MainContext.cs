@@ -44,7 +44,6 @@ namespace Tests.Dal.Contexts
         public virtual DbSet<UserAnswer> UserAnswer { get; set; }
         public virtual DbSet<UserEmployee> UserEmployee { get; set; }
         public virtual DbSet<UserNotificationSetting> UserNotificationSetting { get; set; }
-        public virtual DbSet<UserQuiz> UserQuiz { get; set; }
         public virtual DbSet<UserSecurity> UserSecurity { get; set; }
         public virtual DbSet<Vacancy> Vacancy { get; set; }
         public virtual DbSet<Verb> Verb { get; set; }
@@ -60,8 +59,8 @@ namespace Tests.Dal.Contexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.AddPositionWithCountView();
-            modelBuilder.HasAnnotation("Relational:Collation", "C.UTF-8");
+            modelBuilder.HasPostgresExtension("uuid-ossp")
+                .HasAnnotation("Relational:Collation", "C.UTF-8");
 
             modelBuilder.Entity<Adjective>(entity =>
             {
@@ -162,7 +161,6 @@ namespace Tests.Dal.Contexts
 
             modelBuilder.Entity<JwtOption>(entity =>
             {
-                entity.ToTable("JwtOption");
                 entity.HasNoKey();
 
                 entity.ToTable("JwtOption");
@@ -223,7 +221,7 @@ namespace Tests.Dal.Contexts
             {
                 entity.ToTable("Noun");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Gender).IsRequired();
 
                 entity.Property(e => e.Json)
                     .IsRequired()
@@ -309,14 +307,18 @@ namespace Tests.Dal.Contexts
             {
                 entity.ToTable("Question");
 
+                entity.Property(e => e.Text).IsRequired();
+
                 entity.HasOne(d => d.QuestionType)
                     .WithMany(p => p.Questions)
                     .HasForeignKey(d => d.QuestionTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Question_QuestionTypeId_fkey");
 
                 entity.HasOne(d => d.Quiz)
                     .WithMany(p => p.Questions)
                     .HasForeignKey(d => d.QuizId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Question_QuizId_fkey");
             });
 
@@ -324,9 +326,12 @@ namespace Tests.Dal.Contexts
             {
                 entity.ToTable("QuestionTemplate");
 
+                entity.Property(e => e.Text).IsRequired();
+
                 entity.HasOne(d => d.QuestionType)
                     .WithMany(p => p.QuestionTemplates)
                     .HasForeignKey(d => d.QuestionTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("QuestionTemplate_QuestionTypeId_fkey");
             });
 
@@ -339,11 +344,25 @@ namespace Tests.Dal.Contexts
             {
                 entity.ToTable("Quiz");
 
+                entity.Property(e => e.AddressKey).IsRequired();
+
+                entity.HasOne(d => d.Employee)
+                    .WithMany(p => p.Quizzes)
+                    .HasForeignKey(d => d.EmployeeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Quiz_EmployeeId_fkey");
+
                 entity.HasOne(d => d.Status)
                     .WithMany(p => p.Quizzes)
                     .HasForeignKey(d => d.StatusId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Quiz_StatusId_fkey");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Quizzes)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("Quiz_UserId_fkey");
             });
 
             modelBuilder.Entity<Resume>(entity =>
@@ -530,26 +549,6 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("UserNotificationSetting_UserId_fkey");
             });
 
-            modelBuilder.Entity<UserQuiz>(entity =>
-            {
-                entity.ToTable("UserQuiz");
-
-                entity.HasOne(d => d.Employee)
-                    .WithMany(p => p.UserQuizzes)
-                    .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("UserQuiz_EmployeeId_fkey");
-
-                entity.HasOne(d => d.Quiz)
-                    .WithMany(p => p.UserQuizzes)
-                    .HasForeignKey(d => d.QuizId)
-                    .HasConstraintName("UserQuiz_QuizId_fkey");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.UserQuizzes)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("UserQuiz_UserId_fkey");
-            });
-
             modelBuilder.Entity<UserSecurity>(entity =>
             {
                 entity.HasKey(e => e.UserId)
@@ -587,72 +586,6 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("Vacancy_UserId_fkey");
             });
 
-            modelBuilder.Entity<Notification>(entity =>
-            {
-                entity.HasKey(e => new { e.UserId, e.NotificationId })
-                    .HasName("Notification_pkey");
-
-                entity.ToTable("Notification");
-
-                entity.HasOne(d => d.NotificationTargetType)
-                    .WithMany(p => p.Notifications)
-                    .HasForeignKey(d => d.NotificationTargetTypeId)
-                    .HasConstraintName("Notification_NotificationTargetTypeId_fkey");
-
-                entity.HasOne(d => d.NotificationType)
-                    .WithMany(p => p.Notifications)
-                    .HasForeignKey(d => d.NotificationTypeId)
-                    .HasConstraintName("Notification_NotificationTypeId_fkey");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Notifications)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("Notification_UserId_fkey");
-            });
-
-            modelBuilder.Entity<NotificationTargetType>(entity =>
-            {
-                entity.HasKey(x => x.NotificationTargetTypeId);
-                entity.ToTable("NotificationTargetType");
-
-                entity.Property(e => e.NotificationTargetTypeId).ValueGeneratedNever();
-            });
-
-            modelBuilder.Entity<NotificationType>(entity =>
-            {
-                entity.HasKey(x => x.NotificationTypeId);
-                entity.ToTable("NotificationType");
-
-                entity.Property(e => e.NotificationTypeId).ValueGeneratedNever();
-            });
-
-            modelBuilder.Entity<UserNotificationSetting>(entity =>
-            {
-                entity.HasKey(e => new { e.UserId, e.NotificationTargetTypeId, e.NotificationTypeId })
-                    .HasName("UserNotificationSetting_pkey");
-
-                entity.ToTable("UserNotificationSetting");
-
-                entity.HasOne(d => d.NotificationTargetType)
-                    .WithMany(p => p.UserNotificationSettings)
-                    .HasForeignKey(d => d.NotificationTargetTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("UserNotificationSetting_NotificationTargetTypeId_fkey");
-
-                entity.HasOne(d => d.NotificationType)
-                    .WithMany(p => p.UserNotificationSettings)
-                    .HasForeignKey(d => d.NotificationTypeId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("UserNotificationSetting_NotificationTypeId_fkey");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.UserNotificationSettings)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("UserNotificationSetting_UserId_fkey");
-            });
-
             modelBuilder.Entity<Verb>(entity =>
             {
                 entity.ToTable("Verb");
@@ -662,6 +595,7 @@ namespace Tests.Dal.Contexts
                     .HasColumnType("json");
             });
 
+            modelBuilder.AddPositionWithCountView();
 
             modelBuilder.HasSequence("Adjective_Id_seq");
 

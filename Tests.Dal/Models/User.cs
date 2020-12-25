@@ -12,10 +12,10 @@ namespace Tests.Dal.Models
             Notifications = new HashSet<Notification>();
             Orders = new HashSet<Order>();
             Positions = new HashSet<Position>();
+            Quizzes = new HashSet<Quiz>();
             Subscriptions = new HashSet<Subscription>();
             UserEmployees = new HashSet<UserEmployee>();
             UserNotificationSettings = new HashSet<UserNotificationSetting>();
-            UserQuizzes = new HashSet<UserQuiz>();
             Vacancies = new HashSet<Vacancy>();
         }
 
@@ -31,10 +31,10 @@ namespace Tests.Dal.Models
         public virtual ICollection<Notification> Notifications { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<Position> Positions { get; set; }
+        public virtual ICollection<Quiz> Quizzes { get; set; }
         public virtual ICollection<Subscription> Subscriptions { get; set; }
         public virtual ICollection<UserEmployee> UserEmployees { get; set; }
         public virtual ICollection<UserNotificationSetting> UserNotificationSettings { get; set; }
-        public virtual ICollection<UserQuiz> UserQuizzes { get; set; }
         public virtual ICollection<Vacancy> Vacancies { get; set; }
     }
 }
