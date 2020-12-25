@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using Tests.Bll.Services;
 using Tests.Dal;
 using Tests.Dal.Contexts;
@@ -38,7 +39,9 @@ namespace Tests.QuestionAnswer.WebApi
 
             MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING"));
 
-            JwtOption jwtOption = context.JwtOption.FirstOrDefault();
+            JwtOption jwtOption =
+                JsonConvert.DeserializeObject<JwtOption>(context.GlobalSetting
+                    .FirstOrDefault(x => x.Key == "JwtOption")?.StringValue ?? throw new Exception("Can't find JwtOption setting"));
 
             AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
 

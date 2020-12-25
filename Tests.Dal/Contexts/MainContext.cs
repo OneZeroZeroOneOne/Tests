@@ -162,18 +162,7 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("Employee_VacancyId_fkey");
             });
 
-            modelBuilder.Entity<JwtOption>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToTable("JwtOption");
-
-                entity.Property(e => e.Audience).IsRequired();
-
-                entity.Property(e => e.Issuer).IsRequired();
-
-                entity.Property(e => e.Key).IsRequired();
-            });
+            
 
             modelBuilder.Entity<LongevityType>(entity =>
             {
