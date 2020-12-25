@@ -20,7 +20,6 @@ namespace Tests.Dal.Contexts
         public virtual DbSet<Avatar> Avatar { get; set; }
         public virtual DbSet<DiscountType> DiscountType { get; set; }
         public virtual DbSet<Employee> Employee { get; set; }
-        public virtual DbSet<JwtOption> JwtOption { get; set; }
         public virtual DbSet<LongevityType> LongevityType { get; set; }
         public virtual DbSet<Notification> Notification { get; set; }
         public virtual DbSet<NotificationTargetType> NotificationTargetType { get; set; }
@@ -49,6 +48,8 @@ namespace Tests.Dal.Contexts
         public virtual DbSet<Verb> Verb { get; set; }
         public virtual DbSet<PositionsWithCount> PositionsWithCount { get; set; }
 
+        public virtual DbSet<GlobalSetting> GlobalSetting { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -59,6 +60,8 @@ namespace Tests.Dal.Contexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.AddPositionWithCountView();
+            modelBuilder.AddGlobalSettings();
             modelBuilder.HasPostgresExtension("uuid-ossp")
                 .HasAnnotation("Relational:Collation", "C.UTF-8");
 

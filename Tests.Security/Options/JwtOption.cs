@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-
-#nullable disable
-
-namespace Tests.Dal.Models
+﻿namespace Tests.Security.Options
 {
-    public partial class JwtOption
+    public class JwtOption
     {
         public string Issuer { get; set; }
         public string Audience { get; set; }
