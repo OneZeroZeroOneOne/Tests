@@ -1,22 +1,22 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /source
 
-COPY Tests.QuesionAnswer.WebApi/*.csproj Tests.QuesionAnswer.WebApi/
+COPY Tests.QuestionAnswer.WebApi/*.csproj Tests.QuestionAnswer.WebApi/
 COPY Tests.Dal/*.csproj Tests.Dal/
 COPY Tests.Bll/*.csproj Tests.Bll/
 COPY Tests.Security/*.csproj Tests.Security/
 COPY Tests.Utilities/*.csproj Tests.Utilities/
 COPY Tests.Bll.Template/*.csproj Tests.Bll.Template/
 
-RUN dotnet restore Tests.QuesionAnswer.WebApi/Tests.QuesionAnswer.WebApi.csproj
+RUN dotnet restore Tests.QuestionAnswer.WebApi/Tests.QuestionAnswer.WebApi.csproj
 
-COPY Tests.QuesionAnswer.WebApi/ Tests.QuesionAnswer.WebApi/
+COPY Tests.QuestionAnswer.WebApi/ Tests.QuestionAnswer.WebApi/
 COPY Tests.Dal/ Tests.Dal/
 COPY Tests.Bll/ Tests.Bll/
 COPY Tests.Security/ Tests.Security/
 COPY Tests.Utilities/ Tests.Utilities/
 COPY Tests.Bll.Template/ Tests.Bll.Template/
-WORKDIR /source/Tests.QuesionAnswer.WebApi
+WORKDIR /source/Tests.QuestionAnswer.WebApi
 RUN dotnet build -c release
 
 FROM build AS publish
@@ -25,4 +25,4 @@ RUN dotnet publish -c release --no-build -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:3.1
 WORKDIR /app
 COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "Tests.QuesionAnswer.WebApi.dll"]
+ENTRYPOINT ["dotnet", "Tests.QuestionAnswer.WebApi.dll"]
