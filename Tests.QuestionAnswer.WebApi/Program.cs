@@ -31,7 +31,7 @@ namespace Tests.QuestionAnswer.WebApi
                 {
                     webBuilder.ConfigureKestrel(serverOptions =>
                     {
-                        serverOptions.Listen(IPAddress.Any, 8004, listenOptions =>
+                        serverOptions.Listen(IPAddress.Any, 8003, listenOptions =>
                         {
                             listenOptions.UseConnectionLogging();
                         });

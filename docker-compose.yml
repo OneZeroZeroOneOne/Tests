@@ -41,3 +41,17 @@ services:
      - ./.env
     environment: 
       - ASPNETCORE_ENVIRONMENT=Production
+
+
+  questionanswer-web-api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-questionanswer
+    ports:
+      - "${QUESTIONANSWER_API_PORT_DEV}:8003"
+    expose:
+      - "${QUESTIONANSWER_API_PORT_DEV}"
+    env_file:
+     - ./.env
+    environment: 
+      - ASPNETCORE_ENVIRONMENT=Production

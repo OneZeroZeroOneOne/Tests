@@ -127,7 +127,7 @@ namespace Tests.Authorization.WebApi
                 app.UseSwagger(c => c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
                 {
                     swaggerDoc.Servers = new List<OpenApiServer>
-                        {new OpenApiServer {Url = $"{httpReq.Scheme}://{httpReq.Host.Value}{basePath}"}};
+                        {new OpenApiServer {Url = $"{httpReq.Scheme}s://{httpReq.Host.Value}{basePath}"}};
                 }));
             }
 

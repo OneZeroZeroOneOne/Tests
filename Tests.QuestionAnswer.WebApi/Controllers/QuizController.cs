@@ -40,7 +40,7 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
             }
 
             Quiz quiz = await _quizService.GetQuizByAddressKey(addressKey);
-            if (userId == -1)
+            if (userId != quiz.UserId)
             {
                 if (quiz.Status.Id == 1)
                 {
