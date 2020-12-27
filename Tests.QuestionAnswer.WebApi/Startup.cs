@@ -43,6 +43,7 @@ namespace Tests.QuestionAnswer.WebApi
                 JsonConvert.DeserializeObject<JwtOption>(context.GlobalSetting
                     .FirstOrDefault(x => x.Key == "JwtOption")?.StringValue ?? throw new Exception("Can't find JwtOption setting"));
 
+
             AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
 
             services.AddScoped(x => new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING")));
