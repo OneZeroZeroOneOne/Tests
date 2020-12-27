@@ -46,7 +46,6 @@ namespace Tests.WebApi.Controllers
         public async Task<OutEmployeeViewModel> AddEmployee(InEmployeeViewModel inEmployeeViewModel)
         {
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
-
             Employee newEmp = _mapperProfile.Map<Employee>(inEmployeeViewModel);
             await _employeeService.AddEmployee(newEmp, authorizedUserModel.Id);
 

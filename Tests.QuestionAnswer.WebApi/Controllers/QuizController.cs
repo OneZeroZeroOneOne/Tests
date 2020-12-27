@@ -28,7 +28,7 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
 
 
         [HttpGet]
-        public async Task<OutQuizViewModel> Get([FromQuery] string addressKey)
+        public async Task<OutQuizViewModel> Get([FromRoute] string addressKey)
         {
             var headers = this.Request.Headers;
             bool trytoken = headers.TryGetValue("authorization", out var token);

@@ -56,8 +56,8 @@ namespace Tests.Bll.Services
                                     AvatarId = 1,
                                     SotialNetworks = "@steffanygretzinger",
                                     Phone = "+380732014451",
-                                    MiddleName = "",
                                     FakeEmployee = new FakeEmployee(),
+                                    IsCandidate = true,
                                 },
                 },
 
@@ -73,8 +73,8 @@ namespace Tests.Bll.Services
                                     AvatarId = 1,
                                     SotialNetworks = "@kevinmitnick",
                                     Phone = "+380632013221",
-                                    MiddleName = "",
                                     FakeEmployee = new FakeEmployee(),
+                                    IsCandidate = false,
                                 }
                 }
             };
