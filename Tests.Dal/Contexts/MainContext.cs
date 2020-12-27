@@ -47,7 +47,7 @@ namespace Tests.Dal.Contexts
         public virtual DbSet<Vacancy> Vacancy { get; set; }
         public virtual DbSet<Verb> Verb { get; set; }
         public virtual DbSet<PositionsWithCount> PositionsWithCount { get; set; }
-
+        public virtual DbSet<FakeEmployee> FakeEmployee { get; set; }
         public virtual DbSet<GlobalSetting> GlobalSetting { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -78,9 +78,12 @@ namespace Tests.Dal.Contexts
             {
                 entity.ToTable("Answer");
 
+                entity.Property(e => e.Text).IsRequired();
+
                 entity.HasOne(d => d.Question)
                     .WithMany(p => p.Answers)
                     .HasForeignKey(d => d.QuestionId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("Answer_QuestionId_fkey");
             });
 
@@ -162,7 +165,27 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("Employee_VacancyId_fkey");
             });
 
-            
+            modelBuilder.Entity<FakeEmployee>(entity =>
+            {
+                entity.ToTable("FakeEmployee");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.HasOne(d => d.IdNavigation)
+                    .WithOne(p => p.FakeEmployee)
+                    .HasForeignKey<FakeEmployee>(d => d.Id)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FakeEmployee_Id_fkey");
+            });
+
+            modelBuilder.Entity<GlobalSetting>(entity =>
+            {
+                entity.ToTable("GlobalSetting");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Key).IsRequired();
+            });
 
             modelBuilder.Entity<LongevityType>(entity =>
             {
@@ -587,7 +610,6 @@ namespace Tests.Dal.Contexts
                     .HasColumnType("json");
             });
 
-            modelBuilder.AddPositionWithCountView();
 
             modelBuilder.HasSequence("Adjective_Id_seq");
 

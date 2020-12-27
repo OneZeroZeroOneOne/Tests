@@ -1,15 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Tests.Dal.Models
 {
-    public class GlobalSetting
+    public partial class GlobalSetting
     {
         public int Id { get; set; }
         public string Key { get; set; }
-        public string? StringValue { get; set; }
-        public int? IntValue { get; set; }
+        public string StringValue { get; set; }
+        public long? IntValue { get; set; }
     }
-
 
     public static class ContextGlobalSettingExtension
     {

@@ -13,11 +13,11 @@ namespace Tests.WebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class EmployeeController : ControllerBase
+    public class PersonController : ControllerBase
     {
         private readonly EmployeeService _employeeService;
         private readonly IMapper _mapperProfile;
-        public EmployeeController(EmployeeService employeeService, IMapper mapperProfile)
+        public PersonController(EmployeeService employeeService, IMapper mapperProfile)
         {
             _employeeService = employeeService;
             _mapperProfile = mapperProfile;

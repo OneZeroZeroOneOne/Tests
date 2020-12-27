@@ -29,11 +29,11 @@ namespace Tests.Dal.Models
         public int? ResumeId { get; set; }
         public int? PositionId { get; set; }
         public int? VacancyId { get; set; }
-
         public virtual Avatar Avatar { get; set; }
         public virtual Position Position { get; set; }
         public virtual Resume Resume { get; set; }
         public virtual Vacancy Vacancy { get; set; }
+        public virtual FakeEmployee FakeEmployee { get; set; }
         public virtual ICollection<Quiz> Quizzes { get; set; }
         public virtual ICollection<UserAnswer> UserAnswers { get; set; }
         public virtual ICollection<UserEmployee> UserEmployees { get; set; }
