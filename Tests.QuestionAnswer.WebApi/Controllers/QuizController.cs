@@ -40,20 +40,19 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
             }
 
             Quiz quiz = await _quizService.GetQuizByAddressKey(addressKey);
-            if (userId != quiz.UserId)
+            if (userId == -1)
             {
                 if (quiz.Status.Id == 1)
                 {
                     _quizService.SetQuizStarted(addressKey);
                     return _mapperProfile.Map<OutQuizViewModel>(quiz);
                 }
-                else
-                {
-                    return null;
-                }
-                
+                return null;
             }
-            return _mapperProfile.Map<OutQuizViewModel>(quiz);
+            else if (quiz.UserId != null && userId == quiz.UserId){
+                return _mapperProfile.Map<OutQuizViewModel>(quiz);
+            }
+            return null;
         }
 
 
