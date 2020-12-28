@@ -38,7 +38,8 @@ namespace Tests.WebApi.Controllers
         public async Task<List<OutEmployeeViewModel>> GetEmployees([FromQuery]int? quizStatusId = null, [FromQuery]bool? isCandidate = null, [FromQuery]int? positionId = null)
         {
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
-            return _mapperProfile.Map<List<OutEmployeeViewModel>>(await _employeeService.GetEmployees(authorizedUserModel.Id, quizStatusId, positionId, isCandidate));
+            List<Employee> emps = await _employeeService.GetEmployees(authorizedUserModel.Id, quizStatusId, positionId, isCandidate);
+            return _mapperProfile.Map<List<OutEmployeeViewModel>>(emps);
         }
 
         [HttpPost]
