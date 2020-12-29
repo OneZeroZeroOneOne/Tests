@@ -124,6 +124,7 @@ namespace Tests.Bll.Services
                 {
                     Text = string.Join(". ", scribanAnswerTemplate.Render(templateRealWordDataObject).Split(". ").Select(x => x.FirstCharToUpper())),
                     CreateDateTime = DateTime.Now,
+                    IsRight = answerTemplete.IsRight,
                 });
             }
 
