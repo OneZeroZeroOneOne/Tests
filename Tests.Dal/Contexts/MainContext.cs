@@ -138,7 +138,6 @@ namespace Tests.Dal.Contexts
 
                 entity.Property(e => e.FirstName).IsRequired();
 
-                entity.Property(e => e.MiddleName).IsRequired();
 
                 entity.Property(e => e.SurName)
                     .IsRequired()
