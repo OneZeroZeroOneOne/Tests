@@ -65,10 +65,12 @@ namespace Tests.Bll.Services
             List<UserEmployee> fakeEmployees = new List<UserEmployee>();
             for(int i = 0; i < 5; i++)
             {
-                fakeEmployees.Add(new UserEmployee
+                UserEmployee  userEmployee = new UserEmployee
                 {
                     Employee = FakeUserGenerator.GetFakeUser(positions)
-                });
+                };
+                userEmployee.Employee.FakeEmployee = new FakeEmployee();
+                fakeEmployees.Add(userEmployee);
             }
             newUser.UserSecurity = userSecurity;
             newUser.UserEmployees = fakeEmployees;
