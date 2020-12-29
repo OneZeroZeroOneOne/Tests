@@ -121,7 +121,7 @@ namespace Tests.QuestionAnswer.WebApi
             }
             else
             {
-                var basePath = "/api/questionanswer";
+                var basePath = "/api/quiz";
                 app.UseSwagger(c => c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
                 {
                     swaggerDoc.Servers = new List<OpenApiServer>
