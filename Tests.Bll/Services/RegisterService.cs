@@ -1,11 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
 using Tests.Utilities;
+using Tests.Utilities.Exceptions;
 
 namespace Tests.Bll.Services
 {
@@ -25,6 +28,20 @@ namespace Tests.Bll.Services
         {
             int testSubscriptionTypeId = 1;
             int defAvatarId = 1;
+            GlobalSetting gl = await _context.GlobalSetting.FirstOrDefaultAsync(x => x.Key == "RegistrationPolitics");
+            JObject json = JObject.Parse(gl.StringValue);
+            if (login.Length < int.Parse(json["login"].ToString()))
+            {
+                throw ExceptionFactory.SoftException(ExceptionEnum.ShortLogin, "Short login");
+            } 
+            if(password.Length < int.Parse(json["password"].ToString()))
+            {
+                throw ExceptionFactory.SoftException(ExceptionEnum.ShortPassword, "Short password");
+            }
+            if (!EmailValidator.IsValidEmail(email))
+            {
+                throw ExceptionFactory.SoftException(ExceptionEnum.InvalidEmailFormat, "Invalid email format");
+            }
             Role role = await _context.Role.FirstOrDefaultAsync(x => x.Title == "ClientAdmin");
             User newUser = new User() { RoleId = role.Id, Name = name, CreateDateTime = DateTime.Now, AvatarId = defAvatarId };
             SubscriptionType subscriptionType = await _context.SubscriptionType.Include(x => x.LongevityType).FirstOrDefaultAsync(x => x.Id == testSubscriptionTypeId);
@@ -42,42 +59,17 @@ namespace Tests.Bll.Services
                 Password = password,
                 Email = email,
             };
-            List<UserEmployee> fakeEmployees = new List<UserEmployee>()
+            int positionCount = await _context.Position.CountAsync();
+            Random r = new Random();
+            List<Position> positions = await _context.Position.Skip(positionCount < 5 ? 0 : r.Next(0, positionCount-5)).Take(5).ToListAsync();
+            List<UserEmployee> fakeEmployees = new List<UserEmployee>();
+            for(int i = 0; i < 5; i++)
             {
-                new UserEmployee
+                fakeEmployees.Add(new UserEmployee
                 {
-                    Employee = new Employee
-                                {
-                                    DateOfBirth = DateTime.Now.Subtract(TimeSpan.FromDays(365 * 26)),
-                                    Email = "steffanygretzinger@gmail.com",
-                                    FirstName = "Steffany",
-                                    SurName = "Gretzinger",
-                                    PositionId = 1,
-                                    AvatarId = 1,
-                                    SotialNetworks = "@steffanygretzinger",
-                                    Phone = "+380732014451",
-                                    FakeEmployee = new FakeEmployee(),
-                                    IsCandidate = true,
-                                },
-                },
-
-                new UserEmployee
-                {
-                    Employee = new Employee
-                                {
-                                    DateOfBirth = DateTime.Now.Subtract(TimeSpan.FromDays(365 * 21)),
-                                    Email = "kevinmitnick@gmail.com",
-                                    FirstName = "Kevin",
-                                    SurName = "Mitnick",
-                                    PositionId = 1,
-                                    AvatarId = 1,
-                                    SotialNetworks = "@kevinmitnick",
-                                    Phone = "+380632013221",
-                                    FakeEmployee = new FakeEmployee(),
-                                    IsCandidate = false,
-                                }
-                }
-            };
+                    Employee = FakeUserGenerator.GetFakeUser(positions)
+                });
+            }
             newUser.UserSecurity = userSecurity;
             newUser.UserEmployees = fakeEmployees;
             await _context.User.AddAsync(newUser);

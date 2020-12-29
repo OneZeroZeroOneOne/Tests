@@ -20,5 +20,9 @@
         EmailCantBeEmpty = 16,
         PasswordCantBeEmpty = 17,
         OldPasswordDontMatch = 18,
+        TestAlreadyCompleted = 19,
+        ShortLogin = 20,
+        ShortPassword = 21,
+        InvalidEmailFormat = 22,
     }
 }

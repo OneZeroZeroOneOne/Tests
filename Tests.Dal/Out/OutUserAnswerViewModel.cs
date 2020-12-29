@@ -1,21 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
-#nullable disable
-
-namespace Tests.Dal.Models
+namespace Tests.Dal.Out
 {
-    public partial class UserAnswer
+    public class OutUserAnswerViewModel
     {
         public int? EmployeeId { get; set; }
         public int? QuizId { get; set; }
         public int? QuestionId { get; set; }
         public int? AnswerId { get; set; }
         public DateTime? CreateDateTime { get; set; }
-
-        public virtual Answer Answer { get; set; }
-        public virtual Employee Employee { get; set; }
-        public virtual Question Question { get; set; }
-        public virtual Quiz Quiz { get; set; }
     }
 }

@@ -495,6 +495,8 @@ namespace Tests.Dal.Contexts
             {
                 entity.ToTable("UserAnswer");
 
+                entity.HasKey(e => e.QuestionId);
+
                 entity.HasOne(d => d.Answer)
                     .WithMany(p => p.UserAnswers)
                     .HasForeignKey(d => d.AnswerId)

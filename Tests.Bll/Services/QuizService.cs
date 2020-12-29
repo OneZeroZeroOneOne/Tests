@@ -202,5 +202,36 @@ namespace Tests.Bll.Services
         {
             return await _context.Quiz.Include(x => x.Status).Where(x => x.UserId == userId && x.EmployeeId == empId).ToListAsync();
         }
+
+        public async Task<UserAnswer> SetAnswer(int answerId)
+        {
+            int endStatusId = 3;
+            int notStartedStatus = 1;
+            Answer answer = await _context.Answer.Include(x => x.Question).ThenInclude(x => x.Quiz).ThenInclude(x => x.Status).FirstOrDefaultAsync(x => x.Id == answerId);
+            if (answer.Question.Quiz.Status.Id == endStatusId | answer.Question.Quiz.Status.Id == notStartedStatus)
+            {
+                throw ExceptionFactory.SoftException(ExceptionEnum.TestAlreadyCompleted, "the test has already been completed");
+            }
+
+            UserAnswer userAnswer = await _context.UserAnswer.FirstOrDefaultAsync(x => x.QuestionId == answer.Question.Id);
+            if(userAnswer != null)
+            {
+                userAnswer.AnswerId = answerId;
+            }
+            else
+            {
+                userAnswer = new UserAnswer
+                {
+                    AnswerId = answerId,
+                    QuestionId = answer.Question.Id,
+                    QuizId = answer.Question.Quiz.Id,
+                    EmployeeId = answer.Question.Quiz.EmployeeId,
+                    CreateDateTime = DateTime.Now,
+                };
+                await _context.UserAnswer.AddAsync(userAnswer);
+            }
+            await _context.SaveChangesAsync();
+            return userAnswer;
+        }
     }
 }
