@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Bogus.DataSets;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -146,6 +147,24 @@ namespace Tests.Bll.Services
 
             await _mainContext.SaveChangesAsync();
             return await GetUserNotification(id, notification.NotificationTargetTypeId, null).FirstOrDefaultAsync(x => x.NotificationId == notificationId);
+        }
+
+        public async Task<int> AddPleaseChengePassNot(int userId)
+        {
+            Notification not = new Notification()
+            {
+                UserId = userId,
+                NotificationId = Guid.NewGuid(),
+                CreatedDateTime = DateTime.UtcNow,
+                IsSeen = true,
+                NotificationTargetTypeId = 2,
+                NotificationTypeId = 4,
+                FromUserId = 0,
+                NotificationContent = "Пожалуйста смените установленный системой пароль. Для этого перейдите в настройки",
+            };
+            await _mainContext.Notification.AddAsync(not);
+            await _mainContext.SaveChangesAsync();
+            return 1;
         }
     }
 }

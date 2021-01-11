@@ -30,11 +30,13 @@ namespace Tests.Bll.Services
             int defAvatarId = 1;
             GlobalSetting gl = await _context.GlobalSetting.FirstOrDefaultAsync(x => x.Key == "RegistrationPolitics");
             JObject json = JObject.Parse(gl.StringValue);
-            if (login.Length < int.Parse(json["login"].ToString()))
+            int b = int.Parse(json["name"].ToString());
+            if (name.Length < int.Parse(json["name"].ToString()))
             {
-                throw ExceptionFactory.SoftException(ExceptionEnum.ShortLogin, "Short login");
-            } 
-            if(password.Length < int.Parse(json["password"].ToString()))
+                throw ExceptionFactory.SoftException(ExceptionEnum.ShortName, "Short Name");
+            }
+            int a = int.Parse(json["password"].ToString());
+            if (password.Length < int.Parse(json["password"].ToString()))
             {
                 throw ExceptionFactory.SoftException(ExceptionEnum.ShortPassword, "Short password");
             }
@@ -42,15 +44,17 @@ namespace Tests.Bll.Services
             {
                 throw ExceptionFactory.SoftException(ExceptionEnum.InvalidEmailFormat, "Invalid email format");
             }
+            UserSecurity existUser = await _context.UserSecurity.FirstOrDefaultAsync(x => x.Email == email);
+            if (existUser != null) throw ExceptionFactory.SoftException(ExceptionEnum.UserAlreadyExist, $"user with email - {email} already exist");
             Role role = await _context.Role.FirstOrDefaultAsync(x => x.Title == "ClientAdmin");
-            User newUser = new User() { RoleId = role.Id, Name = name, CreateDateTime = DateTime.Now, AvatarId = defAvatarId };
+            User newUser = new User() { RoleId = role.Id, Name = name, CreateDateTime = DateTime.UtcNow, AvatarId = defAvatarId };
             SubscriptionType subscriptionType = await _context.SubscriptionType.Include(x => x.LongevityType).FirstOrDefaultAsync(x => x.Id == testSubscriptionTypeId);
             Subscription testSubscription = new Subscription
             {
                 TypeId = testSubscriptionTypeId,
-                CreatedDateTime = DateTime.Now,
-                BeginDateTime = DateTime.Now,
-                EndDateTime = TimeAdder.AddTimeSegment(DateTime.Now, subscriptionType.LongevityType.LongevityMeasureName, subscriptionType.LongevityType.LongevityValue),
+                CreatedDateTime = DateTime.UtcNow,
+                BeginDateTime = DateTime.UtcNow,
+                EndDateTime = TimeAdder.AddTimeSegment(DateTime.UtcNow, subscriptionType.LongevityType.LongevityMeasureName, subscriptionType.LongevityType.LongevityValue),
             };
             newUser.Subscriptions.Add(testSubscription);
             UserSecurity userSecurity = new UserSecurity()
@@ -82,5 +86,6 @@ namespace Tests.Bll.Services
 
         }
 
+        
     }
 }

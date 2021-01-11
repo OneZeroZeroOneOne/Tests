@@ -11,6 +11,8 @@ using Tests.Dal.Models;
 using Tests.Dal.Out;
 using Tests.Security.Authorization;
 using Tests.Security.Options;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Tests.QuestionAnswer.WebApi.Controllers
 {
@@ -28,7 +30,7 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
 
 
         [HttpGet]
-        public async Task<OutQuizViewModel> Get([FromRoute] string addressKey)
+        public async Task<OutQuizViewModel> Get([FromQuery] string addressKey)
         {
             var headers = this.Request.Headers;
             bool trytoken = headers.TryGetValue("authorization", out var token);
@@ -44,7 +46,7 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
             {
                 if (quiz.Status.Id == 1)
                 {
-                    _quizService.SetQuizStarted(addressKey);
+                    await _quizService.SetQuizStarted(addressKey);
                     return _mapperProfile.Map<OutQuizViewModel>(quiz);
                 }
                 else
@@ -56,9 +58,10 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
             return _mapperProfile.Map<OutQuizViewModel>(quiz);
         }
 
-        
-
-
-
+        [HttpPost]
+        public async Task<Dictionary<string, bool>> SetQuizEnded([FromQuery] string addressKey)
+        {
+            return await _quizService.SetQuizEnded(addressKey);
+        }
     }
 }

@@ -40,6 +40,8 @@ jobs:
           envkey_PAYMENTS_API_PORT_DEV: ${{ secrets.PAYMENTS_API_PORT_DEV }}
           envkey_AUTHORIZATION_API_PORT_DEV: ${{ secrets.AUTHORIZATION_API_PORT_DEV }}
           envkey_QUESTIONANSWER_API_PORT_DEV: ${{ secrets.QUESTIONANSWER_API_PORT_DEV }}
+          envkey_MAILJET_KEY_API_DEV: ${{ secrets.MAILJET_KEY_API }}
+          envkey_MAILJET_SECRET_API_DEV: ${{ secrets.MAILJET_SECRET_API }}
           file_name: .env
 
       - name: Move envfile to host

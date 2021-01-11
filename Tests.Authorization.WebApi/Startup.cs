@@ -15,6 +15,8 @@ using Tests.Dal.Contexts;
 using Tests.Dal.Models;
 using Tests.Security.Options;
 using Tests.Utilities.Middlewares;
+using Mailjet.Client;
+using HtmlAgilityPack;
 
 namespace Tests.Authorization.WebApi
 {
@@ -52,6 +54,16 @@ namespace Tests.Authorization.WebApi
             services.AddTransient<UserService>();
 
             services.AddTransient<NotificationService>();
+
+            services.AddTransient<SettingsService>();
+
+            services.AddTransient<NotificationService>();
+
+            services.AddScoped(x =>
+            {
+                return new MailjetClient((context.GlobalSetting.FirstOrDefault(x => x.Key == "MailjetApiKey")).StringValue, (context.GlobalSetting.FirstOrDefault(x => x.Key == "MailjetApiSecret")).StringValue);
+                //return new MailjetClient(Environment.GetEnvironmentVariable("MAILJET_KEY_API"), Environment.GetEnvironmentVariable("MAILJET_SECRET_API"));
+            });
 
             services.AddSwaggerGen(c =>
             {

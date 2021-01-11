@@ -9,16 +9,16 @@ namespace Tests.Dal.Models
     {
         public Answer()
         {
-            UserAnswers = new HashSet<UserAnswer>();
+            EmployeeAnswers = new HashSet<EmployeeAnswer>();
         }
 
         public int Id { get; set; }
         public int QuestionId { get; set; }
         public string Text { get; set; }
         public DateTime CreateDateTime { get; set; }
-        public bool? IsRight { get; set; }
+        public bool IsRight { get; set; }
 
         public virtual Question Question { get; set; }
-        public virtual ICollection<UserAnswer> UserAnswers { get; set; }
+        public virtual ICollection<EmployeeAnswer> EmployeeAnswers { get; set; }
     }
 }

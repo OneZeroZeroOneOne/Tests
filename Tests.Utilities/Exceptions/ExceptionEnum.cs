@@ -21,8 +21,16 @@
         PasswordCantBeEmpty = 17,
         OldPasswordDontMatch = 18,
         TestAlreadyCompleted = 19,
-        ShortLogin = 20,
+        ShortName = 20,
         ShortPassword = 21,
         InvalidEmailFormat = 22,
+        AnswerNotFound = 23,
+        QuestionNotFound = 24,
+        AssessmentNotFound = 25,
+        QuestionNotBelongsQuiz = 26,
+        IsStatisticQuestion = 27,
+        TestNotStarted = 28,
+        QuizNotFound = 29,
+        UserAlreadyExist = 30,
     }
 }

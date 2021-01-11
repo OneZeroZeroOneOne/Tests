@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Tests.Dal.Models
 {
-    public partial class UserAnswer
+    public partial class EmployeeAnswer
     {
         public int? EmployeeId { get; set; }
         public int? QuizId { get; set; }

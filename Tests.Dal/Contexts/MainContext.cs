@@ -40,7 +40,7 @@ namespace Tests.Dal.Contexts
         public virtual DbSet<SubscriptionDiscount> SubscriptionDiscount { get; set; }
         public virtual DbSet<SubscriptionType> SubscriptionType { get; set; }
         public virtual DbSet<User> User { get; set; }
-        public virtual DbSet<UserAnswer> UserAnswer { get; set; }
+        public virtual DbSet<EmployeeAnswer> EmployeeAnswer { get; set; }
         public virtual DbSet<UserEmployee> UserEmployee { get; set; }
         public virtual DbSet<UserNotificationSetting> UserNotificationSetting { get; set; }
         public virtual DbSet<UserSecurity> UserSecurity { get; set; }
@@ -49,6 +49,9 @@ namespace Tests.Dal.Contexts
         public virtual DbSet<PositionsWithCount> PositionsWithCount { get; set; }
         public virtual DbSet<FakeEmployee> FakeEmployee { get; set; }
         public virtual DbSet<GlobalSetting> GlobalSetting { get; set; }
+        public virtual DbSet<Assessment> Assessment { get; set; }
+        public virtual DbSet<EmployeeAnswerAssessment> EmployeeAnswerAssessment { get; set; }
+        public virtual DbSet<AllegedEmployeeError> AllegedEmployeeError { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -72,6 +75,23 @@ namespace Tests.Dal.Contexts
                 entity.Property(e => e.Json)
                     .IsRequired()
                     .HasColumnType("json");
+            });
+
+            modelBuilder.Entity<AllegedEmployeeError>(entity =>
+            {
+                entity.HasKey(e => e.QuestionId);
+
+                entity.ToTable("AllegedEmployeeError");
+
+                entity.HasOne(x => x.Question)
+                .WithOne(x => x.AllegedEmployeeError)
+                .HasForeignKey<AllegedEmployeeError>(x => x.QuestionId)
+                .HasConstraintName("AllegedEmployeeErrors_QuestionId_fkey");
+
+                entity.HasOne(x => x.Employee)
+                .WithMany(x => x.AllegedEmployeeError)
+                .HasForeignKey(x => x.EmployeeId)
+                .HasConstraintName("AllegedEmployeeErrors_EmployeeId_fkey");
             });
 
             modelBuilder.Entity<Answer>(entity =>
@@ -400,6 +420,31 @@ namespace Tests.Dal.Contexts
                 entity.ToTable("Status");
             });
 
+            modelBuilder.Entity<Assessment>(entity =>
+            {
+                entity.ToTable("Assessment");
+
+                entity.HasKey(e => e.Id);
+            });
+
+            modelBuilder.Entity<EmployeeAnswerAssessment>(entity =>
+            {
+                entity.ToTable("EmployeeAnswerAssessment");
+
+                entity.HasKey(e => e.QuestionId);
+
+                entity.HasOne(e => e.Assessment)
+                .WithMany(e => e.EmployeeAnswerAssessments)
+                .HasForeignKey(e => e.AssessmentId)
+                .HasConstraintName("EmployeeAnswerAssessment_AssessmentId_fkey");
+
+                entity.HasOne(e => e.Question)
+                .WithOne(e => e.EmployeeAnswerAssessment)
+                .HasForeignKey<EmployeeAnswerAssessment>(e => e.QuestionId)
+                .HasConstraintName("EmployeeAnswerAssessment_QuestionId_fkey");
+
+            });
+
             modelBuilder.Entity<Subscription>(entity =>
             {
                 entity.HasKey(e => new { e.UserId, e.Id })
@@ -490,31 +535,31 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("User_RoleId_fkey");
             });
 
-            modelBuilder.Entity<UserAnswer>(entity =>
+            modelBuilder.Entity<EmployeeAnswer>(entity =>
             {
-                entity.ToTable("UserAnswer");
+                entity.ToTable("EmployeeAnswer");
 
                 entity.HasKey(e => e.QuestionId);
 
                 entity.HasOne(d => d.Answer)
-                    .WithMany(p => p.UserAnswers)
+                    .WithMany(p => p.EmployeeAnswers)
                     .HasForeignKey(d => d.AnswerId)
-                    .HasConstraintName("UserAnswer_AnswerId_fkey");
+                    .HasConstraintName("EmployeeAnswer_AnswerId_fkey");
 
                 entity.HasOne(d => d.Employee)
                     .WithMany(p => p.UserAnswers)
                     .HasForeignKey(d => d.EmployeeId)
-                    .HasConstraintName("UserAnswer_EmployeeId_fkey");
+                    .HasConstraintName("EmployeeAnswer_EmployeeId_fkey");
 
                 entity.HasOne(d => d.Question)
                     .WithMany(p => p.UserAnswers)
                     .HasForeignKey(d => d.QuestionId)
-                    .HasConstraintName("UserAnswer_QuestionId_fkey");
+                    .HasConstraintName("EmployeeAnswer_QuestionId_fkey");
 
                 entity.HasOne(d => d.Quiz)
                     .WithMany(p => p.UserAnswers)
                     .HasForeignKey(d => d.QuizId)
-                    .HasConstraintName("UserAnswer_QuizId_fkey");
+                    .HasConstraintName("EmployeeAnswer_QuizId_fkey");
             });
 
             modelBuilder.Entity<UserEmployee>(entity =>

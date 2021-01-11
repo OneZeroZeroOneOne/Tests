@@ -41,5 +41,33 @@ namespace Tests.WebApi.Controllers
             List<Quiz> quizzes = await _quizService.GetEmployeeQuizzes(id, authorizedUserModel.Id);
             return _mapperProfile.Map<List<OutQuizViewModel>>(quizzes);
         }
+
+
+        [HttpGet]
+        [Route("GetStat")]
+        [Authorize(Policy = "ClientAdmin")]
+        public async Task<List<OutQuestionResultViewModel>> GetStat([FromQuery] int quizId)
+        {
+            AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
+            Quiz quiz = await _quizService.GetQuiz(quizId);
+            Dictionary<string, bool> questionsResult = await _quizService.GetTestResult(quiz);
+            Dictionary<string, string> questionsAssessment = await _quizService.GetTestAssessments(quiz);
+            List<OutQuestionResultViewModel> responce = new List<OutQuestionResultViewModel>();
+            foreach (var questionResult in questionsResult)
+            {
+                string assessmentText = "";
+                if (questionsAssessment.ContainsKey(questionResult.Key))
+                {
+                    assessmentText = questionsAssessment[questionResult.Key];   
+                }
+                responce.Add(new OutQuestionResultViewModel() 
+                {
+                    QuestionId = int.Parse(questionResult.Key),
+                    IsRight = questionResult.Value,
+                    AssessmentText = assessmentText,
+                });
+            }
+            return responce;
+        }
     }
 }

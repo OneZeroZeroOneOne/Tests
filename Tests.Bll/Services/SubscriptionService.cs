@@ -20,14 +20,14 @@ namespace Tests.Bll.Services
 
         public async Task<Subscription> GetCurrent(int userId)
         {
-            DateTime currTime = DateTime.Now;
+            DateTime currTime = DateTime.UtcNow;
             return await _context.Subscription.Include(x => x.Type).ThenInclude(x => x.LongevityType).FirstOrDefaultAsync(x => x.UserId == userId && x.BeginDateTime <= currTime && x.EndDateTime >= currTime);
         }
 
 
         public async Task<List<Subscription>> GetAllSubscriptions(int userId)
         {
-            DateTime currTime = DateTime.Now;
+            DateTime currTime = DateTime.UtcNow;
             return await _context.Subscription.Include(x => x.Type).ThenInclude(x => x.LongevityType).Where(x => x.UserId == userId && x.BeginDateTime <= currTime && x.EndDateTime >= currTime).ToListAsync();
         }
 
