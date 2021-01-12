@@ -8,6 +8,7 @@ using Tests.Bll.Services;
 using Tests.Dal.Models;
 using Tests.Dal.Out;
 using Tests.Security.Authorization;
+using Tests.Utilities.Exceptions;
 
 namespace Tests.WebApi.Controllers
 {
@@ -50,6 +51,7 @@ namespace Tests.WebApi.Controllers
         {
             AuthorizedUserModel authorizedUserModel = (AuthorizedUserModel)HttpContext.User.Identity;
             Quiz quiz = await _quizService.GetQuiz(quizId);
+            if (authorizedUserModel.Id != quiz.Id) throw ExceptionFactory.SoftException(ExceptionEnum.QuizNotFound, "quiz not found");
             Dictionary<string, bool> questionsResult = await _quizService.GetTestResult(quiz);
             Dictionary<string, string> questionsAssessment = await _quizService.GetTestAssessments(quiz);
             List<OutQuestionResultViewModel> responce = new List<OutQuestionResultViewModel>();
