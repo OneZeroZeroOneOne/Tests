@@ -37,7 +37,7 @@ namespace Tests.Bll.Services
                     Questions = x.Questions.OrderByDescending(y => y.CreateDateTime).ToList(),
                     Status = x.Status,
                     StatusId = x.StatusId,
-
+                    UserId = x.UserId,
                 }).FirstOrDefaultAsync(x => x.AddressKey == addressKey));
         }
 

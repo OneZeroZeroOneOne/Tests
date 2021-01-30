@@ -13,6 +13,7 @@ using Tests.Security.Authorization;
 using Tests.Security.Options;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System;
 
 namespace Tests.QuestionAnswer.WebApi.Controllers
 {
@@ -37,12 +38,23 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
             int userId = -1;
             if (trytoken != false)
             {
-                var jwtToken = JwtService.ParseToken(token.ToString().Split(" ").Last(), AuthOption.KEY);
-                userId = int.Parse(jwtToken.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value);
+                try
+                {
+                    var jwtToken = JwtService.ParseToken(token.ToString().Split(" ").Last(), AuthOption.KEY);
+                    userId = int.Parse(jwtToken.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value);
+                }
+                catch(Exception ex) 
+                {
+                }
+                
             }
 
             Quiz quiz = await _quizService.GetQuizByAddressKey(addressKey);
-            if (quiz != null && userId != quiz.UserId)
+            if(quiz == null)
+            {
+                return null;
+            }
+            if (userId != quiz.UserId)
             {
                 if (quiz.Status.Id == 1)
                 {
