@@ -26,7 +26,7 @@ namespace Tests.Bll.Services
             _context = context;
         }
 
-        public async Task<Quiz> GetQuizByAddressKey(string addressKey, bool withAnswer = false)
+        public async Task<Quiz> GetQuizByAddressKey(string addressKey)
         {
             return (await _context.Quiz.Include(x => x.Questions).ThenInclude(x => x.Answers).Include(x => x.Status).Include(x => x.Questions).ThenInclude(x => x.EmployeeAnswers)
                 .Select(x => new Quiz
@@ -34,7 +34,7 @@ namespace Tests.Bll.Services
                     Id = x.Id,
                     AddressKey = x.AddressKey,
                     CreateDateTime = x.CreateDateTime,
-                    Questions = x.Questions.OrderByDescending(y => y.CreateDateTime).ToList(),
+                    Questions = x.Questions.OrderBy(y => y.CreateDateTime).ToList(),
                     Status = x.Status,
                     StatusId = x.StatusId,
                     UserId = x.UserId,
@@ -411,6 +411,11 @@ namespace Tests.Bll.Services
             Quiz quiz = await _context.Quiz.Include(x => x.Questions).ThenInclude(x => x.Answers).FirstOrDefaultAsync(x => x.Id == quizId);
             if (quiz == null) throw ExceptionFactory.SoftException(ExceptionEnum.QuizNotFound, "quiz not found");
             return quiz;
+        }
+
+        public async Task<EmployeeAnswer> GetEmployeeAnswer(int questionId)
+        {
+            return await _context.EmployeeAnswer.Include(x => x.Answer).FirstOrDefaultAsync(x => x.QuestionId == questionId);
         }
     }
 }

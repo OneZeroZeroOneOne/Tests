@@ -11,6 +11,6 @@ namespace Tests.Dal.Out
         public string Text { get; set; }
         public DateTime CreateDateTime { get; set; }
         public bool IsPicked { get; set; }
-        public bool IsRight { get; set; }
+        public bool IsCorrect { get; set; }
     }
 }

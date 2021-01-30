@@ -76,6 +76,32 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
             }
             returnModel = _mapperProfile.Map<OutQuizViewModel>(quiz);
             returnModel.IsAdmin = true;
+            foreach(var i in returnModel.Questions)
+            {
+                EmployeeAnswer employeeAnswer = await _quizService.GetEmployeeAnswer(i.Id);
+                if(employeeAnswer != null)
+                {
+                    i.IsUserAnswered = true;
+                    foreach(var j in i.Answers)
+                    {
+                        if(j.Id == employeeAnswer.AnswerId)
+                        {
+                            j.IsPicked = true;
+                            j.IsCorrect = employeeAnswer.Answer.IsRight;
+                        }
+                        else
+                        {
+                            j.IsPicked = false;
+                        }
+
+                    }
+                }
+                else
+                {
+                    i.IsUserAnswered = false;
+                }
+
+            }
             return returnModel;
         }
 
