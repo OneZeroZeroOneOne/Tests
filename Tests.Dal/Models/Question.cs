@@ -10,7 +10,7 @@ namespace Tests.Dal.Models
         public Question()
         {
             Answers = new HashSet<Answer>();
-            UserAnswers = new HashSet<EmployeeAnswer>();
+            EmployeeAnswers = new HashSet<EmployeeAnswer>();
         }
 
         public int Id { get; set; }
@@ -24,7 +24,7 @@ namespace Tests.Dal.Models
         public virtual EmployeeAnswerAssessment EmployeeAnswerAssessment { get; set; }
         public virtual AllegedEmployeeError AllegedEmployeeError { get; set; }
         public virtual ICollection<Answer> Answers { get; set; }
-        public virtual ICollection<EmployeeAnswer> UserAnswers { get; set; }
+        public virtual ICollection<EmployeeAnswer> EmployeeAnswers { get; set; }
         public virtual int? AboutQuestionId { get; set; } 
         public virtual Question AboutQuestion { get; set; }
     }

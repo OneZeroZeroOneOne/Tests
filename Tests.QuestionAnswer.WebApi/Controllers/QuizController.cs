@@ -35,6 +35,10 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
         {
             var headers = this.Request.Headers;
             bool trytoken = headers.TryGetValue("authorization", out var token);
+            if(trytoken == false)
+            {
+                trytoken = headers.TryGetValue("Authorization", out token);
+            }
             int userId = -1;
             if (trytoken != false)
             {
@@ -54,12 +58,15 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
             {
                 return null;
             }
+            OutQuizViewModel returnModel = null;
             if (userId != quiz.UserId)
             {
                 if (quiz.Status.Id == 1)
                 {
                     await _quizService.SetQuizStarted(addressKey);
-                    return _mapperProfile.Map<OutQuizViewModel>(quiz);
+                    returnModel = _mapperProfile.Map<OutQuizViewModel>(quiz);
+                    returnModel.IsAdmin = false;
+                    return returnModel;
                 }
                 else
                 {
@@ -67,7 +74,9 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
                 }
                 
             }
-            return _mapperProfile.Map<OutQuizViewModel>(quiz);
+            returnModel = _mapperProfile.Map<OutQuizViewModel>(quiz);
+            returnModel.IsAdmin = true;
+            return returnModel;
         }
 
         [HttpPost]

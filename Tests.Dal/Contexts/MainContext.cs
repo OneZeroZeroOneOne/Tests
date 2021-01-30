@@ -552,7 +552,7 @@ namespace Tests.Dal.Contexts
                     .HasConstraintName("EmployeeAnswer_EmployeeId_fkey");
 
                 entity.HasOne(d => d.Question)
-                    .WithMany(p => p.UserAnswers)
+                    .WithMany(p => p.EmployeeAnswers)
                     .HasForeignKey(d => d.QuestionId)
                     .HasConstraintName("EmployeeAnswer_QuestionId_fkey");
 

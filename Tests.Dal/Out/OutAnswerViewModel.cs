@@ -10,5 +10,7 @@ namespace Tests.Dal.Out
         public int QuestionId { get; set; }
         public string Text { get; set; }
         public DateTime CreateDateTime { get; set; }
+        public bool IsPicked { get; set; }
+        public bool IsRight { get; set; }
     }
 }

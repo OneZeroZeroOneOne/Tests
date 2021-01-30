@@ -12,5 +12,9 @@ namespace Tests.Dal.Out
         public string Text { get; set; }
         public DateTime CreateDateTime { get; set; }
         public List<OutAnswerViewModel> Answers { get; set; }
+
+        public bool IsUserAnswered { get; set; }
+        //public  { get; set; }
+
     }
 }

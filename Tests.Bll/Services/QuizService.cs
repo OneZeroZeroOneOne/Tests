@@ -26,9 +26,9 @@ namespace Tests.Bll.Services
             _context = context;
         }
 
-        public async Task<Quiz> GetQuizByAddressKey(string addressKey)
+        public async Task<Quiz> GetQuizByAddressKey(string addressKey, bool withAnswer = false)
         {
-            return (await _context.Quiz.Include(x => x.Questions).ThenInclude(x => x.Answers).Include(x => x.Status)
+            return (await _context.Quiz.Include(x => x.Questions).ThenInclude(x => x.Answers).Include(x => x.Status).Include(x => x.Questions).ThenInclude(x => x.EmployeeAnswers)
                 .Select(x => new Quiz
                 {
                     Id = x.Id,

@@ -15,8 +15,10 @@ namespace Tests.Dal
 
             CreateMap<Status, OutStatusViewModel>();
             CreateMap<Quiz, OutQuizViewModel>().ForMember(x => x.Status, x => x.MapFrom(y => y.Status));
-            CreateMap<Question, OutQuestionViewModel>().ForMember(x => x.Answers, x => x.MapFrom(y => y.Answers));
+            CreateMap<Question, OutQuestionViewModel>().ForMember(x => x.Answers, x => x.MapFrom(y => y.Answers))
+                .ForMember(x => x.IsUserAnswered, x => x.MapFrom(y => y.EmployeeAnswers == null ));
             CreateMap<Answer, OutAnswerViewModel>();
+
             CreateMap<EmployeeAnswer, OutUserAnswerViewModel>();
             CreateMap<EmployeeAnswerAssessment, OutEmployeeAnswerAssessmentViewModel>();
             CreateMap<Assessment, OutAssessmentViewModel>();
