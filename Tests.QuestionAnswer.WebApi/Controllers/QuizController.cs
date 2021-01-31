@@ -76,11 +76,13 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
             }
             returnModel = _mapperProfile.Map<OutQuizViewModel>(quiz);
             returnModel.IsAdmin = true;
-            foreach(var i in returnModel.Questions)
+            returnModel.AnsweredQuestionIds = new List<int>();
+            foreach (var i in returnModel.Questions)
             {
                 EmployeeAnswer employeeAnswer = await _quizService.GetEmployeeAnswer(i.Id);
                 if(employeeAnswer != null)
                 {
+                    returnModel.AnsweredQuestionIds.Add(employeeAnswer.QuestionId);
                     i.IsUserAnswered = true;
                     foreach(var j in i.Answers)
                     {
@@ -102,6 +104,7 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
                 }
 
             }
+            returnModel.AllegedErrors = (await _quizService.GetAllegedEmployeeErrors(quiz.Id)).Select(x => x.QuestionId).ToList();
             return returnModel;
         }
 

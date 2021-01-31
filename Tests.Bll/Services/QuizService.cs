@@ -417,5 +417,10 @@ namespace Tests.Bll.Services
         {
             return await _context.EmployeeAnswer.Include(x => x.Answer).FirstOrDefaultAsync(x => x.QuestionId == questionId);
         }
+
+        public async Task<List<AllegedEmployeeError>> GetAllegedEmployeeErrors(int quizId)
+        {
+            return await _context.AllegedEmployeeError.Include(x => x.Question).Where(x => x.Question.QuizId == quizId).ToListAsync();
+        }
     }
 }
