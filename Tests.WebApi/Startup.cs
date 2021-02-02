@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -9,18 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Newtonsoft.Json;
 using Tests.Bll.DescribeDependency;
 using Tests.Bll.Services;
-using Tests.Dal;
-using Tests.Dal.Contexts;
-using Tests.Dal.Models;
+using Tests.Security;
 using Tests.Security.Authorization;
 using Tests.Security.Options;
+using Tests.Utilities;
 using Tests.Utilities.Middlewares;
 
 namespace Tests.WebApi
@@ -38,38 +33,10 @@ namespace Tests.WebApi
         {
             services.AddControllers();
 
-            MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING"));
-
-            services.AddScoped(x => new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING")));
+            services.AddDefaults();
+            services.AddSecurity();
 
             services.AddNotificationSender();
-
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
-
-            JwtOption jwtOption =
-                JsonConvert.DeserializeObject<JwtOption>(context.GlobalSetting
-                    .FirstOrDefault(x => x.Key == "JwtOption")?.StringValue ?? throw new Exception("Can't find JwtOption setting"));
-
-            if (jwtOption == null) throw new ApplicationException("Can't configure authorize jwt options");
-
-            AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
-
-            List<Role> roleList = context.Role.ToList();
-            foreach (var t in roleList)
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(t.Title, policy =>
-                        policy.Requirements.Add(new RoleEntryRequirement(t.Id)));
-                });
-            }
-            services.AddSingleton<IAuthorizationHandler, RoleEntryHandler>();
 
             services.AddTransient<EmployeeService>();
 
@@ -80,6 +47,7 @@ namespace Tests.WebApi
             services.AddTransient<VacancyService>();
 
             services.AddTransient<PositionService>();
+
             services.AddTransient<NotificationService>();
 
             services.AddScoped(x =>

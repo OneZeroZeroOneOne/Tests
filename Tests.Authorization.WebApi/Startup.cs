@@ -17,6 +17,8 @@ using Tests.Security.Options;
 using Tests.Utilities.Middlewares;
 using Mailjet.Client;
 using HtmlAgilityPack;
+using Tests.Security;
+using Tests.Utilities;
 
 namespace Tests.Authorization.WebApi
 {
@@ -32,22 +34,15 @@ namespace Tests.Authorization.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
 
-            MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING"));
-
-            JwtOption jwtOption =
-                JsonConvert.DeserializeObject<JwtOption>(context.GlobalSetting
-                    .FirstOrDefault(x => x.Key == "JwtOption")?.StringValue ?? throw new Exception("Can't find JwtOption setting"));
-
-            AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
+            services.AddDefaults();
+            services.AddSecurity();
+            services.AddEmailClient();
 
             services.AddNotificationSender();
 
             services.AddTransient<RegisterService>();
-
-            services.AddScoped(x => new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING")));
 
             services.AddTransient<LoginService>();
 
@@ -58,12 +53,6 @@ namespace Tests.Authorization.WebApi
             services.AddTransient<SettingsService>();
 
             services.AddTransient<NotificationService>();
-
-            services.AddScoped(x =>
-            {
-                return new MailjetClient((context.GlobalSetting.FirstOrDefault(x => x.Key == "MailjetApiKey")).StringValue, (context.GlobalSetting.FirstOrDefault(x => x.Key == "MailjetApiSecret")).StringValue);
-                //return new MailjetClient(Environment.GetEnvironmentVariable("MAILJET_KEY_API"), Environment.GetEnvironmentVariable("MAILJET_SECRET_API"));
-            });
 
             services.AddSwaggerGen(c =>
             {
