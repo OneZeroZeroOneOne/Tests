@@ -39,7 +39,7 @@ namespace Tests.Security.Authorization
             return "Bearer " + new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        public static JwtSecurityToken? ParseTokenNullSafe(string token)
+        public static JwtSecurityToken? ParseTokenErrorSafe(string token)
         {
             try
             {

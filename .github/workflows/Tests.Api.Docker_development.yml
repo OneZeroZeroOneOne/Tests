@@ -66,5 +66,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: cd ${{env.directoryName}} && docker-compose down && docker-compose up --build --detach
+          script: cd ${{env.directoryName}} && docker-compose down && docker-compose pull && docker-compose up --build --detach
   
