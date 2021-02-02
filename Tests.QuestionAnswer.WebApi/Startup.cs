@@ -13,6 +13,7 @@ using Tests.Bll.Services;
 using Tests.Dal;
 using Tests.Dal.Contexts;
 using Tests.Security.Options;
+using Tests.Utilities;
 using Tests.Utilities.Middlewares;
 
 namespace Tests.QuestionAnswer.WebApi
@@ -31,23 +32,7 @@ namespace Tests.QuestionAnswer.WebApi
         {
             services.AddControllers();
 
-            MainContext context = new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING"));
-
-            JwtOption jwtOption =
-                JsonConvert.DeserializeObject<JwtOption>(context.GlobalSetting
-                    .FirstOrDefault(x => x.Key == "JwtOption")?.StringValue ?? throw new Exception("Can't find JwtOption setting"));
-
-            AuthOption.SetAuthOption(jwtOption.Issuer, jwtOption.Audience, jwtOption.Key, jwtOption.Lifetime);
-
-            services.AddScoped(x => new MainContext(Environment.GetEnvironmentVariable("DATABASECONNECTIONSTRING")));
-
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            services.AddDefaults();
 
             services.AddTransient<QuizService>();
 
