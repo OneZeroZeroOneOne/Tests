@@ -13,11 +13,11 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
     {
         private bool IsTokenProvided => Request.Headers.ContainsKey("Authorization") ||
                                          Request.Headers.ContainsKey("authorization");
-        private StringValues StringToken => Request.Headers.ContainsKey("Authorization")
+        private string StringToken => Request.Headers.ContainsKey("Authorization")
             ? Request.Headers.GetOrDefault("Authorization")
             : Request.Headers.GetOrDefault("authorization");
 
-        protected JwtSecurityToken Token => IsTokenProvided ? JwtService.ParseTokenErrorSafe(StringToken) ?? throw new Exception("Can't parse token") : throw new Exception("User don't provided token");
+        protected JwtSecurityToken Token => IsTokenProvided ? JwtService.ParseTokenErrorSafe(StringToken.Split(" ").LastOrDefault() ?? string.Empty) ?? throw new Exception("Can't parse token") : throw new Exception("User don't provided token");
 
         protected int UserId()
         {

@@ -45,7 +45,7 @@ namespace Tests.Security.Authorization
             {
                 return ParseToken(token, AuthOption.KEY);
             }
-            catch (Exception)
+            catch
             {
                 return null;
             }
