@@ -29,7 +29,7 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
                 return null;
 
             OutQuizViewModel returnModel = _mapperProfile.Map<OutQuizViewModel>(quiz);
-            returnModel.IsAdmin = UserId == quiz.UserId;
+            returnModel.IsAdmin = UserId() == quiz.UserId;
 
             if (!returnModel.IsAdmin)
             {
