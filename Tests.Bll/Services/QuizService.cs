@@ -1,15 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO.Pipes;
 using System.Linq;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using Tests.Bll.Services.NotificationSenderTarget;
 using Tests.Bll.Template;
 using Tests.Dal.Contexts;
 using Tests.Dal.Models;
@@ -26,7 +20,7 @@ namespace Tests.Bll.Services
             _context = context;
         }
 
-        public async Task<Quiz> GetQuizByAddressKey(string addressKey)
+        public async Task<Quiz?> GetQuizByAddressKey(string addressKey)
         {
             return (await _context.Quiz.Include(x => x.Questions).ThenInclude(x => x.Answers).Include(x => x.Status).Include(x => x.Questions).ThenInclude(x => x.EmployeeAnswers)
                 .Select(x => new Quiz
@@ -58,10 +52,8 @@ namespace Tests.Bll.Services
             {
                 return await GetTestResult(quiz);
             }
-            else
-            {
-                throw ExceptionFactory.SoftException(ExceptionEnum.TestNotStarted, "the test not be started or already ended");
-            }
+
+            throw ExceptionFactory.SoftException(ExceptionEnum.TestNotStarted, "the test not be started or already ended");
         }
 
         public async Task<Quiz> CreateNewQuiz(int empId, int userId)
@@ -413,7 +405,7 @@ namespace Tests.Bll.Services
             return quiz;
         }
 
-        public async Task<EmployeeAnswer> GetEmployeeAnswer(int questionId)
+        public async Task<EmployeeAnswer?> GetEmployeeAnswer(int questionId)
         {
             return await _context.EmployeeAnswer.Include(x => x.Answer).FirstOrDefaultAsync(x => x.QuestionId == questionId);
         }

@@ -1,25 +1,16 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Tests.Bll.Services;
-using Tests.Dal.Models;
 using Tests.Dal.Out;
-using Tests.Security.Authorization;
-using Tests.Security.Options;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System;
 
 namespace Tests.QuestionAnswer.WebApi.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class QuizController : ControllerBase
+    public class QuizController : BaseController
     {
         private readonly QuizService _quizService;
         private readonly IMapper _mapperProfile;
@@ -31,55 +22,29 @@ namespace Tests.QuestionAnswer.WebApi.Controllers
 
 
         [HttpGet]
-        public async Task<OutQuizViewModel> Get([FromQuery] string addressKey)
+        public async Task<OutQuizViewModel?> Get([FromQuery] string addressKey)
         {
-            var headers = this.Request.Headers;
-            bool trytoken = headers.TryGetValue("authorization", out var token);
-            if(trytoken == false)
-            {
-                trytoken = headers.TryGetValue("Authorization", out token);
-            }
-            int userId = -1;
-            if (trytoken != false)
-            {
-                try
-                {
-                    var jwtToken = JwtService.ParseToken(token.ToString().Split(" ").Last(), AuthOption.KEY);
-                    userId = int.Parse(jwtToken.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value);
-                }
-                catch(Exception ex) 
-                {
-                }
-                
-            }
-
-            Quiz quiz = await _quizService.GetQuizByAddressKey(addressKey);
+            var quiz = await _quizService.GetQuizByAddressKey(addressKey);
             if(quiz == null)
-            {
                 return null;
-            }
-            OutQuizViewModel returnModel = null;
-            if (userId != quiz.UserId)
+
+            OutQuizViewModel returnModel = _mapperProfile.Map<OutQuizViewModel>(quiz);
+            returnModel.IsAdmin = UserId == quiz.UserId;
+
+            if (!returnModel.IsAdmin)
             {
-                if (quiz.Status.Id == 1)
-                {
-                    await _quizService.SetQuizStarted(addressKey);
-                    returnModel = _mapperProfile.Map<OutQuizViewModel>(quiz);
-                    returnModel.IsAdmin = false;
-                    return returnModel;
-                }
-                else
-                {
+                if (quiz.Status.Id != 1) 
                     return null;
-                }
-                
+
+                await _quizService.SetQuizStarted(addressKey);
+
+                return returnModel;
             }
-            returnModel = _mapperProfile.Map<OutQuizViewModel>(quiz);
-            returnModel.IsAdmin = true;
+            
             returnModel.AnsweredQuestionIds = new List<int>();
             foreach (var i in returnModel.Questions)
             {
-                EmployeeAnswer employeeAnswer = await _quizService.GetEmployeeAnswer(i.Id);
+                var employeeAnswer = await _quizService.GetEmployeeAnswer(i.Id);
                 if(employeeAnswer != null)
                 {
                     returnModel.AnsweredQuestionIds.Add(employeeAnswer.QuestionId);
